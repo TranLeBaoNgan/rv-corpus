@@ -15,6 +15,7 @@ This corpus contains hand-written assembly tests targeting different RiscV instr
 - **RV32F**: 32-bit with F extension (single-precision floating-point)
 - **RV32D**: 32-bit with D extension (double-precision floating-point)
 - **RV32FD**: 32-bit with F and D extensions (combined floating-point)
+- **RV64D**: 64-bit with D extension (double-precision floating-point, RV64-only instructions)
 
 All tests are compiled using LLVM/Clang toolchain and include verbatim citations from the RISC-V Unprivileged ISA Specification as comments.
 
@@ -137,6 +138,14 @@ All tests are compiled using LLVM/Clang toolchain and include verbatim citations
   - Combined arithmetic with both precisions
   - Integer conversions for both float types
 
+### RV64D Tests (rv64d/)
+- **01_rv64_double_precision_fp.s**: Tests RV64-only D extension instructions
+  - 64-bit integer conversions (FCVT.L.D, FCVT.LU.D, FCVT.D.L, FCVT.D.LU)
+  - Double-precision move operations (FMV.X.D, FMV.D.X)
+  - Sign extension behavior for 32-bit conversions
+  - Bit pattern preservation for non-canonical NaNs
+  - Tests with max/min int64 and uint64 values
+
 ## Compilation
 
 ### Prerequisites
@@ -209,6 +218,7 @@ Each instruction test is documented with relevant specification quotes to ensure
 | RV64I       | 1     | ✓           | ✗             |
 | RV64IM      | 1     | ✓           | ✗             |
 | RV64IMA     | 0     | -           | ✗             |
+| RV64D       | 1     | ✓           | ✗             |
 
 **Note**: rv286 currently only supports RV32I. The other ISA variants (RV32IM, RV32IMA, RV64I, RV64IM, RV64IMA) are included in the corpus for completeness and testing other RiscV tools, but are not compatible with rv286.
 

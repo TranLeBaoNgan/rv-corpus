@@ -190,11 +190,29 @@ else
     echo "RV32FD: No tests found (directory empty or doesn't exist)"
 fi
 
+# Compile RV64D tests
+echo ""
+echo "=== Compiling RV64D Tests ==="
+rv64d_success=0
+rv64d_total=0
+if [ -d rv64d ] && [ "$(ls -A rv64d/*.s 2>/dev/null)" ]; then
+    for test in rv64d/*.s; do
+        [ -f "$test" ] || continue
+        rv64d_total=$((rv64d_total + 1))
+        if compile_test "$test" "rv64ifd" "lp64d"; then
+            rv64d_success=$((rv64d_success + 1))
+        fi
+    done
+    echo "RV64D: $rv64d_success/$rv64d_total tests compiled successfully"
+else
+    echo "RV64D: No tests found (directory empty or doesn't exist)"
+fi
+
 # Summary
 echo ""
 echo "=== Compilation Summary ==="
-total_success=$((success + im_success + ima_success + rv64_success + rv64im_success + rv64ima_success + zicsr_success + f_success + d_success + fd_success))
-total_tests=$((total + im_total + ima_total + rv64_total + rv64im_total + rv64ima_total + zicsr_total + f_total + d_total + fd_total))
+total_success=$((success + im_success + ima_success + rv64_success + rv64im_success + rv64ima_success + zicsr_success + f_success + d_success + fd_success + rv64d_success))
+total_tests=$((total + im_total + ima_total + rv64_total + rv64im_total + rv64ima_total + zicsr_total + f_total + d_total + fd_total + rv64d_total))
 echo "Total: $total_success/$total_tests tests compiled successfully"
 
 if [ $total_success -eq $total_tests ]; then
