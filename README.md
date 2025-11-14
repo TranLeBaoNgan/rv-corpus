@@ -16,7 +16,12 @@ This corpus contains hand-written assembly tests targeting different RiscV instr
 - **RV32D**: 32-bit with D extension (double-precision floating-point)
 - **RV32FD**: 32-bit with F and D extensions (combined floating-point)
 
-All tests are compiled using LLVM/Clang toolchain and include verbatim citations from the [RISC-V Unprivileged ISA Specification](https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html) as comments.
+All tests are compiled using LLVM/Clang toolchain and include verbatim citations from the RISC-V Unprivileged ISA Specification as comments.
+
+### Specification References
+
+- **For AI agents and automated tools**: A local copy of the specification is available at `riscv-unprivileged.html` in the repository root. This file can be accessed without network restrictions and contains the full specification text.
+- **For human review**: The online version is recommended for better navigation and formatting: [RISC-V Unprivileged ISA Specification](https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html) (may be blocked for some automated tools)
 
 ## Test Organization
 
