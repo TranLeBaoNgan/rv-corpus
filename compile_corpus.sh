@@ -2,6 +2,9 @@
 # Compilation script for RiscV test corpus using LLVM tools
 # Compiles RV32I, RV64I, and extension tests
 
+# Ensure script runs in the directory where it's located
+cd "$(dirname "$0")"
+
 set -e
 
 CLANG="${CLANG:-clang}"
