@@ -4,11 +4,11 @@
   "isa": "RV32I",
   "version": "1.0.0",
   "spec_reference": "https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html",
-  "description": "Tests RV32I control transfer instructions including unconditional jumps (JAL, JALR) and conditional branches (BEQ, BNE, BLT, BGE, BLTU, BGEU)",
+  "description": "Tests RV32I control transfer instructions including unconditional jumps (JAL, JALR) and conditional branches (BEQ, BNE, BLT, BGE, BLTU, BGEU). HINT instructions (addi x0, x0, N) mark test case N.",
   "test_cases": [
     {
       "name": "JAL and JALR basic jump and return",
-      "line_range": {"start": 10, "end": 21},
+      "hint_marker": 1,
       "instructions": ["JAL", "JALR"],
       "expected_behavior": {
         "registers": {
@@ -23,7 +23,7 @@
     },
     {
       "name": "JALR indirect jump",
-      "line_range": {"start": 23, "end": 33},
+      "hint_marker": 2,
       "instructions": ["JALR"],
       "expected_behavior": {
         "registers": {
@@ -37,7 +37,7 @@
     },
     {
       "name": "BEQ branch if equal - taken",
-      "line_range": {"start": 40, "end": 49},
+      "hint_marker": 3,
       "instructions": ["BEQ"],
       "initial_state": {
         "registers": {"a0": 10, "a1": 10}
@@ -54,7 +54,7 @@
     },
     {
       "name": "BNE branch if not equal - taken",
-      "line_range": {"start": 51, "end": 58},
+      "hint_marker": 4,
       "instructions": ["BNE"],
       "initial_state": {
         "registers": {"a2": 5, "a3": 10}
@@ -71,7 +71,7 @@
     },
     {
       "name": "BLT branch if less than signed - taken",
-      "line_range": {"start": 60, "end": 69},
+      "hint_marker": 5,
       "instructions": ["BLT"],
       "initial_state": {
         "registers": {"s0": -5, "s1": 10}
@@ -88,7 +88,7 @@
     },
     {
       "name": "BLTU branch if less than unsigned - taken",
-      "line_range": {"start": 71, "end": 79},
+      "hint_marker": 6,
       "instructions": ["BLTU"],
       "initial_state": {
         "registers": {"s2": "0xFFFFFFFF", "s3": 10}
@@ -106,7 +106,7 @@
     },
     {
       "name": "BGE branch if greater or equal signed - taken",
-      "line_range": {"start": 81, "end": 90},
+      "hint_marker": 7,
       "instructions": ["BGE"],
       "initial_state": {
         "registers": {"a4": 20, "a5": 10}
@@ -123,7 +123,7 @@
     },
     {
       "name": "BGEU branch if greater or equal unsigned - equal case",
-      "line_range": {"start": 92, "end": 99},
+      "hint_marker": 8,
       "instructions": ["BGEU"],
       "initial_state": {
         "registers": {"a6": 10, "a7": 10}
@@ -140,7 +140,7 @@
     },
     {
       "name": "Forward and backward branches",
-      "line_range": {"start": 101, "end": 108},
+      "hint_marker": 9,
       "instructions": ["J"],
       "expected_behavior": {
         "registers": {

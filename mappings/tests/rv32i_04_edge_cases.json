@@ -4,11 +4,11 @@
   "isa": "RV32I",
   "version": "1.0.0",
   "spec_reference": "https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html",
-  "description": "Tests edge cases and boundary conditions for RV32I including overflow, underflow, maximum values, and special register behavior",
+  "description": "Tests edge cases and boundary conditions for RV32I including overflow, underflow, maximum values, and special register behavior. HINT instructions (addi x0, x0, N) mark test case N.",
   "test_cases": [
     {
       "name": "Integer overflow with ADDI",
-      "line_range": {"start": 12, "end": 14},
+      "hint_marker": 1,
       "instructions": ["ADDI"],
       "initial_state": {
         "registers": {"t0": "0x7FFFFFFF"}
@@ -26,7 +26,7 @@
     },
     {
       "name": "Integer underflow with ADDI",
-      "line_range": {"start": 16, "end": 18},
+      "hint_marker": 2,
       "instructions": ["ADDI"],
       "initial_state": {
         "registers": {"t2": "0x80000000"}
@@ -44,7 +44,7 @@
     },
     {
       "name": "ADD overflow with two MAX_INT",
-      "line_range": {"start": 20, "end": 23},
+      "hint_marker": 3,
       "instructions": ["ADD"],
       "initial_state": {
         "registers": {"a0": "0x7FFFFFFF", "a1": "0x7FFFFFFF"}
@@ -61,7 +61,7 @@
     },
     {
       "name": "SUB underflow from MIN_INT",
-      "line_range": {"start": 25, "end": 28},
+      "hint_marker": 4,
       "instructions": ["SUB"],
       "initial_state": {
         "registers": {"a3": "0x80000000", "a4": 1}
@@ -78,7 +78,7 @@
     },
     {
       "name": "Zero register hardwired to 0",
-      "line_range": {"start": 30, "end": 35},
+      "hint_marker": 5,
       "instructions": ["ADD"],
       "initial_state": {
         "registers": {"t0": 42, "x0": 0}
@@ -96,7 +96,7 @@
     },
     {
       "name": "Maximum shift amount (31)",
-      "line_range": {"start": 37, "end": 42},
+      "hint_marker": 6,
       "instructions": ["SRL", "SRA"],
       "initial_state": {
         "registers": {"s0": "0x80000000", "s1": 31}
@@ -114,7 +114,7 @@
     },
     {
       "name": "Shift by 0",
-      "line_range": {"start": 44, "end": 47},
+      "hint_marker": 7,
       "instructions": ["SLL"],
       "initial_state": {
         "registers": {"s4": "0x12345678", "s5": 0}
@@ -130,7 +130,7 @@
     },
     {
       "name": "Shift amount uses only lower 5 bits",
-      "line_range": {"start": 49, "end": 56},
+      "hint_marker": 8,
       "instructions": ["SLL"],
       "initial_state": {
         "registers": {"t4": "0xFFFFFFFF", "t5": 32, "a6": "0xFFFFFFFF", "a7": 33}
@@ -149,7 +149,7 @@
     },
     {
       "name": "SLTI boundary comparisons",
-      "line_range": {"start": 58, "end": 62},
+      "hint_marker": 9,
       "instructions": ["SLTI"],
       "initial_state": {
         "registers": {"t0": 0}
@@ -167,7 +167,7 @@
     },
     {
       "name": "SLTU with max unsigned value",
-      "line_range": {"start": 64, "end": 68},
+      "hint_marker": 10,
       "instructions": ["SLTU"],
       "initial_state": {
         "registers": {"s0": "0xFFFFFFFF", "s1": 0}
@@ -185,7 +185,7 @@
     },
     {
       "name": "SLT with negative numbers",
-      "line_range": {"start": 70, "end": 74},
+      "hint_marker": 11,
       "instructions": ["SLT"],
       "initial_state": {
         "registers": {"a0": -1, "a1": -2}
@@ -202,7 +202,7 @@
     },
     {
       "name": "XOR self-cancellation",
-      "line_range": {"start": 76, "end": 79},
+      "hint_marker": 12,
       "instructions": ["XOR"],
       "initial_state": {
         "registers": {"t0": "0x12345678"}
@@ -220,7 +220,7 @@
     },
     {
       "name": "Maximum and minimum I-type immediates",
-      "line_range": {"start": 81, "end": 85},
+      "hint_marker": 13,
       "instructions": ["ADDI"],
       "expected_behavior": {
         "registers": {
@@ -236,7 +236,7 @@
     },
     {
       "name": "LUI with maximum value",
-      "line_range": {"start": 87, "end": 88},
+      "hint_marker": 14,
       "instructions": ["LUI"],
       "expected_behavior": {
         "registers": {
@@ -249,8 +249,21 @@
       "edge_case": true
     },
     {
+      "name": "AUIPC with maximum offset",
+      "hint_marker": 15,
+      "instructions": ["AUIPC"],
+      "expected_behavior": {
+        "registers": {
+          "s7": "PC + 0xFFFFF000"
+        }
+      },
+      "comment": "AUIPC (add upper immediate to pc) forms a 32-bit offset from the 20-bit U-immediate, filling in the lowest 12 bits with zeros, adds this offset to the address of the AUIPC instruction, then places the result in register rd.",
+      "spec_section": "2.4.1",
+      "edge_case": true
+    },
+    {
       "name": "BEQ with equal values - taken",
-      "line_range": {"start": 93, "end": 101},
+      "hint_marker": 16,
       "instructions": ["BEQ"],
       "initial_state": {
         "registers": {"t0": 42, "t1": 42}
@@ -266,7 +279,7 @@
     },
     {
       "name": "BNE with equal values - not taken",
-      "line_range": {"start": 103, "end": 109},
+      "hint_marker": 17,
       "instructions": ["BNE"],
       "initial_state": {
         "registers": {"t0": 42, "t1": 42}
@@ -282,7 +295,7 @@
     },
     {
       "name": "BGE with equal values - taken",
-      "line_range": {"start": 111, "end": 117},
+      "hint_marker": 18,
       "instructions": ["BGE"],
       "initial_state": {
         "registers": {"t0": 42, "t1": 42}
@@ -299,7 +312,7 @@
     },
     {
       "name": "BGEU with equal values - taken",
-      "line_range": {"start": 119, "end": 125},
+      "hint_marker": 19,
       "instructions": ["BGEU"],
       "initial_state": {
         "registers": {"t0": 42, "t1": 42}

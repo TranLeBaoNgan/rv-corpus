@@ -4,11 +4,11 @@
   "isa": "RV32I",
   "version": "1.0.0",
   "spec_reference": "https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html",
-  "description": "Tests RV32I load and store instructions for bytes, halfwords, and words with sign/zero extension",
+  "description": "Tests RV32I load and store instructions for bytes, halfwords, and words with sign/zero extension. HINT instructions (addi x0, x0, N) mark test case N.",
   "test_cases": [
     {
       "name": "LW load word",
-      "line_range": {"start": 17, "end": 20},
+      "hint_marker": 1,
       "instructions": ["LW"],
       "initial_state": {
         "memory": {
@@ -28,7 +28,7 @@
     },
     {
       "name": "LH load halfword sign-extended",
-      "line_range": {"start": 22, "end": 25},
+      "hint_marker": 2,
       "instructions": ["LH"],
       "initial_state": {
         "memory": {
@@ -47,7 +47,7 @@
     },
     {
       "name": "LHU load halfword zero-extended",
-      "line_range": {"start": 27, "end": 28},
+      "hint_marker": 3,
       "instructions": ["LHU"],
       "expected_behavior": {
         "registers": {
@@ -60,7 +60,7 @@
     },
     {
       "name": "LB load byte sign-extended",
-      "line_range": {"start": 30, "end": 32},
+      "hint_marker": 4,
       "instructions": ["LB"],
       "expected_behavior": {
         "registers": {
@@ -74,7 +74,7 @@
     },
     {
       "name": "LBU load byte zero-extended",
-      "line_range": {"start": 34, "end": 35},
+      "hint_marker": 5,
       "instructions": ["LBU"],
       "expected_behavior": {
         "registers": {
@@ -86,7 +86,7 @@
     },
     {
       "name": "SW store word",
-      "line_range": {"start": 44, "end": 46},
+      "hint_marker": 6,
       "instructions": ["SW"],
       "initial_state": {
         "registers": {"a1": "0x12345678"}
@@ -101,7 +101,7 @@
     },
     {
       "name": "SH store halfword",
-      "line_range": {"start": 48, "end": 50},
+      "hint_marker": 7,
       "instructions": ["SH"],
       "initial_state": {
         "registers": {"a2": "0xABCD"}
@@ -116,7 +116,7 @@
     },
     {
       "name": "SB store byte",
-      "line_range": {"start": 52, "end": 54},
+      "hint_marker": 8,
       "instructions": ["SB"],
       "initial_state": {
         "registers": {"a3": "0xEF"}
@@ -131,7 +131,7 @@
     },
     {
       "name": "Verify stores with different load widths",
-      "line_range": {"start": 56, "end": 61},
+      "hint_marker": 9,
       "instructions": ["LW", "LH", "LHU", "LB", "LBU"],
       "expected_behavior": {
         "registers": {
@@ -149,7 +149,7 @@
     },
     {
       "name": "Negative offset loads",
-      "line_range": {"start": 63, "end": 67},
+      "hint_marker": 10,
       "instructions": ["LW"],
       "expected_behavior": {
         "registers": {
@@ -164,7 +164,7 @@
     },
     {
       "name": "Sign extension boundary - 0xFF byte",
-      "line_range": {"start": 69, "end": 73},
+      "hint_marker": 11,
       "instructions": ["SB", "LB", "LBU"],
       "initial_state": {
         "registers": {"t0": 255}
@@ -182,7 +182,7 @@
     },
     {
       "name": "Store zero register",
-      "line_range": {"start": 75, "end": 77},
+      "hint_marker": 12,
       "instructions": ["SW", "LW"],
       "expected_behavior": {
         "registers": {
