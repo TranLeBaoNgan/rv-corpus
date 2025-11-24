@@ -1,0 +1,158 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/portal-co/rv-corpus/schemas/test-mapping.schema.json",
+  "title": "RISC-V Test Mapping Schema",
+  "description": "Schema for RISC-V test case mappings documenting expected behavior. Test cases are identified by HINT instructions (no-op instructions with rd=x0) embedded in the assembly code.",
+  "type": "object",
+  "required": ["$schema", "test_file", "isa", "version", "test_cases"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Reference to this JSON schema"
+    },
+    "test_file": {
+      "type": "string",
+      "description": "Path to the assembly test file this mapping documents"
+    },
+    "isa": {
+      "type": "string",
+      "description": "ISA variant (e.g., RV32I, RV64I, RV32IM)",
+      "pattern": "^RV(32|64)[A-Z]+((_[A-Z][a-z]+)+)?$"
+    },
+    "version": {
+      "type": "string",
+      "description": "Version of this mapping file",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "spec_reference": {
+      "type": "string",
+      "description": "URL to the RISC-V specification used"
+    },
+    "description": {
+      "type": "string",
+      "description": "Overall description of what this test file tests"
+    },
+    "test_cases": {
+      "type": "array",
+      "description": "Array of test cases in the file",
+      "items": {
+        "$ref": "#/definitions/test_case"
+      }
+    }
+  },
+  "definitions": {
+    "test_case": {
+      "type": "object",
+      "required": ["name", "hint_marker", "instructions", "expected_behavior", "comment"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name or identifier for this test case"
+        },
+        "hint_marker": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2047,
+          "description": "HINT instruction marker value (1-2047). In assembly, this appears as 'addi x0, x0, N' where N is this value. The HINT instruction marks the start of this test case."
+        },
+        "instructions": {
+          "type": "array",
+          "description": "List of instructions being tested",
+          "items": {
+            "type": "string"
+          }
+        },
+        "initial_state": {
+          "type": "object",
+          "description": "Initial register/memory state before execution",
+          "properties": {
+            "registers": {
+              "type": "object",
+              "description": "Initial register values",
+              "additionalProperties": {
+                "oneOf": [
+                  { "type": "integer" },
+                  { "type": "string" }
+                ]
+              }
+            },
+            "memory": {
+              "type": "object",
+              "description": "Initial memory values",
+              "additionalProperties": {
+                "oneOf": [
+                  { "type": "integer" },
+                  { "type": "string" }
+                ]
+              }
+            }
+          }
+        },
+        "expected_behavior": {
+          "type": "object",
+          "description": "Expected state after execution",
+          "properties": {
+            "registers": {
+              "type": "object",
+              "description": "Expected register values after execution",
+              "additionalProperties": {
+                "oneOf": [
+                  { "type": "integer" },
+                  { "type": "string" }
+                ]
+              }
+            },
+            "memory": {
+              "type": "object",
+              "description": "Expected memory values after execution",
+              "additionalProperties": {
+                "oneOf": [
+                  { "type": "integer" },
+                  { "type": "string" }
+                ]
+              }
+            },
+            "flags": {
+              "type": "object",
+              "description": "Expected flag/CSR values",
+              "additionalProperties": {
+                "oneOf": [
+                  { "type": "integer" },
+                  { "type": "string" },
+                  { "type": "boolean" }
+                ]
+              }
+            },
+            "pc_change": {
+              "type": "string",
+              "description": "Expected PC change (e.g., 'sequential', 'branch taken', 'jump to label')"
+            }
+          }
+        },
+        "comment": {
+          "type": "string",
+          "description": "Verbatim quote from the RISC-V specification describing the expected behavior"
+        },
+        "spec_section": {
+          "type": "string",
+          "description": "Section reference in the RISC-V specification"
+        },
+        "notes": {
+          "type": "array",
+          "description": "Additional notes about this test case",
+          "items": {
+            "type": "string"
+          }
+        },
+        "edge_case": {
+          "type": "boolean",
+          "description": "Whether this is an edge case test"
+        },
+        "python_verification": {
+          "type": "string",
+          "description": "Python code to calculate expected values"
+        }
+      }
+    }
+  }
+}

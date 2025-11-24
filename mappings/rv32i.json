@@ -667,6 +667,30 @@
       "comment": "The NOP instruction does not change any user-visible state, except for advancing the pc and incrementing any applicable performance counters. NOP is encoded as ADDI x0, x0, 0.",
       "spec_section": "2.4.3",
       "operation": "no operation"
+    },
+    "HINT": {
+      "format": "I-type",
+      "encoding": {
+        "opcode": "0b0010011",
+        "funct3": "0b000",
+        "rd": "00000 (x0)",
+        "rs1": "00000 (x0) or any register",
+        "imm": "bits 31:20 (12-bit signed, non-zero for HINT vs NOP)",
+        "full_encoding": "imm[11:0] | rs1[19:15] | 000 | 00000 | 0010011"
+      },
+      "assembly_syntax": "addi x0, x0, imm  OR  addi x0, rs1, imm",
+      "description": "HINT instruction - no-op that can convey information to microarchitecture or tooling. Encoded as ADDI with rd=x0.",
+      "comment": "HINT instructions are usually used to communicate performance hints to the microarchitecture. HINTs are encoded as integer computational instructions with rd=x0. Like NOP, HINT does not change any user-visible state except for advancing the pc. When rs1=x0 and imm=0, this is the standard NOP encoding.",
+      "spec_section": "2.9",
+      "operation": "no operation (hints may be interpreted by microarchitecture)",
+      "notes": [
+        "HINT is encoded as ADDI x0, x0, imm where imm != 0",
+        "Other HINT encodings include: SLTI/SLTIU/ANDI/ORI/XORI with rd=x0",
+        "Shift instructions with rd=x0 are also HINTs",
+        "LUI x0, imm and AUIPC x0, imm (when imm != 0) are HINTs",
+        "In this corpus, HINT immediate values 1-2047 are used as test case markers"
+      ],
+      "extensions": []
     }
   }
 }

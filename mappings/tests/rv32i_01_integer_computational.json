@@ -1,0 +1,240 @@
+{
+  "$schema": "../../schemas/test-mapping.schema.json",
+  "test_file": "rv32i/01_integer_computational.s",
+  "isa": "RV32I",
+  "version": "1.0.0",
+  "spec_reference": "https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html",
+  "description": "Tests all RV32I integer computational instructions including register-immediate and register-register operations. HINT instructions (addi x0, x0, N) mark test case N.",
+  "test_cases": [
+    {
+      "name": "ADDI basic positive",
+      "hint_marker": 1,
+      "instructions": ["ADDI"],
+      "initial_state": {
+        "registers": {"a0": 10}
+      },
+      "expected_behavior": {
+        "registers": {
+          "a1": 15,
+          "a2": 7,
+          "a3": 42
+        }
+      },
+      "comment": "ADDI adds the sign-extended 12-bit immediate to register rs1. Arithmetic overflow is ignored and the result is simply the low XLEN bits of the result.",
+      "spec_section": "2.4.1",
+      "python_verification": "a0 = 10; a1 = a0 + 5; a2 = a0 + (-3); a3 = 0 + 42  # a1=15, a2=7, a3=42"
+    },
+    {
+      "name": "SLTI signed comparison",
+      "hint_marker": 2,
+      "instructions": ["SLTI"],
+      "initial_state": {
+        "registers": {"t0": -5, "a0": 10}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t1": 1,
+          "t2": 0
+        }
+      },
+      "comment": "SLTI (set less than immediate) places the value 1 in register rd if register rs1 is less than the sign-extended immediate when both are treated as signed numbers, else 0 is written to rd.",
+      "spec_section": "2.4.1",
+      "python_verification": "import ctypes; t0 = ctypes.c_int32(-5).value; t1 = 1 if t0 < 0 else 0; t2 = 1 if 10 < 5 else 0  # t1=1, t2=0"
+    },
+    {
+      "name": "SLTIU unsigned comparison",
+      "hint_marker": 3,
+      "instructions": ["SLTIU"],
+      "initial_state": {
+        "registers": {"t0": -5, "t4": 5}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t3": 0,
+          "t5": 1
+        }
+      },
+      "comment": "SLTIU (set less than immediate, unsigned) is similar but compares the values as unsigned numbers (i.e., the immediate is first sign-extended to XLEN bits then treated as an unsigned number).",
+      "spec_section": "2.4.1",
+      "python_verification": "t0_unsigned = 0xFFFFFFFB  # -5 as unsigned 32-bit; t3 = 1 if t0_unsigned < 10 else 0  # 0 (large unsigned > 10); t5 = 1 if 5 < 10 else 0  # 1",
+      "notes": ["Negative numbers appear as large unsigned values"]
+    },
+    {
+      "name": "ANDI ORI XORI bitwise operations",
+      "hint_marker": 4,
+      "instructions": ["ANDI", "ORI", "XORI"],
+      "initial_state": {
+        "registers": {"s0": 255}
+      },
+      "expected_behavior": {
+        "registers": {
+          "s1": 15,
+          "s2": 2047,
+          "s3": 85
+        }
+      },
+      "comment": "ANDI, ORI, XORI are logical operations that perform bitwise AND, OR, and XOR on register rs1 and the sign-extended 12-bit immediate and place the result in rd.",
+      "spec_section": "2.4.1",
+      "python_verification": "s0 = 0xFF; s1 = s0 & 0x0F; s2 = s0 | 0x700; s3 = s0 ^ 0xAA  # s1=0x0F=15, s2=0x7FF=2047, s3=0x55=85"
+    },
+    {
+      "name": "SLLI logical left shift",
+      "hint_marker": 5,
+      "instructions": ["SLLI"],
+      "initial_state": {
+        "registers": {"s4": 1}
+      },
+      "expected_behavior": {
+        "registers": {
+          "s5": 16
+        }
+      },
+      "comment": "SLLI is a logical left shift (zeros are shifted into the lower bits).",
+      "spec_section": "2.4.1",
+      "python_verification": "s4 = 1; s5 = s4 << 4  # s5 = 16"
+    },
+    {
+      "name": "SRLI logical right shift",
+      "hint_marker": 6,
+      "instructions": ["SRLI"],
+      "initial_state": {
+        "registers": {"s6": "0x80000000"}
+      },
+      "expected_behavior": {
+        "registers": {
+          "s7": "0x08000000"
+        }
+      },
+      "comment": "SRLI is a logical right shift (zeros are shifted into the upper bits).",
+      "spec_section": "2.4.1",
+      "python_verification": "s6 = 0x80000000; s7 = s6 >> 4  # s7 = 0x08000000"
+    },
+    {
+      "name": "SRAI arithmetic right shift",
+      "hint_marker": 7,
+      "instructions": ["SRAI"],
+      "initial_state": {
+        "registers": {"s6": "0x80000000"}
+      },
+      "expected_behavior": {
+        "registers": {
+          "s8": "0xF8000000"
+        }
+      },
+      "comment": "SRAI is an arithmetic right shift (the original sign bit is copied into the vacated upper bits).",
+      "spec_section": "2.4.1",
+      "python_verification": "import ctypes; s6 = ctypes.c_int32(0x80000000).value; s8 = s6 >> 4  # s8 = 0xF8000000 (sign extended)"
+    },
+    {
+      "name": "LUI load upper immediate",
+      "hint_marker": 8,
+      "instructions": ["LUI"],
+      "expected_behavior": {
+        "registers": {
+          "s9": "0x12345000"
+        }
+      },
+      "comment": "LUI (load upper immediate) is used to build 32-bit constants and uses the U-type format. LUI places the 20-bit U-immediate into bits 31–12 of register rd and places zero in the lowest 12 bits.",
+      "spec_section": "2.4.1",
+      "python_verification": "s9 = 0x12345 << 12  # s9 = 0x12345000"
+    },
+    {
+      "name": "AUIPC add upper immediate to PC",
+      "hint_marker": 9,
+      "instructions": ["AUIPC"],
+      "expected_behavior": {
+        "registers": {
+          "s10": "PC value at instruction"
+        }
+      },
+      "comment": "AUIPC (add upper immediate to pc) forms a 32-bit offset from the 20-bit U-immediate, filling in the lowest 12 bits with zeros, adds this offset to the address of the AUIPC instruction, then places the result in register rd.",
+      "spec_section": "2.4.1",
+      "notes": ["With immediate 0, s10 = PC at this instruction"]
+    },
+    {
+      "name": "ADD SUB register operations",
+      "hint_marker": 10,
+      "instructions": ["ADD", "SUB"],
+      "initial_state": {
+        "registers": {"t0": 100, "t1": 50}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t2": 150,
+          "t3": 50
+        }
+      },
+      "comment": "ADD performs the addition of rs1 and rs2. SUB performs the subtraction of rs2 from rs1. Overflows are ignored and the low XLEN bits of the results are written to the destination rd.",
+      "spec_section": "2.4.2",
+      "python_verification": "t0 = 100; t1 = 50; t2 = t0 + t1; t3 = t0 - t1  # t2=150, t3=50"
+    },
+    {
+      "name": "SLL logical left shift register",
+      "hint_marker": 11,
+      "instructions": ["SLL"],
+      "initial_state": {
+        "registers": {"t4": 1, "t5": 3}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t6": 8
+        }
+      },
+      "comment": "SLL, SRL, and SRA perform logical left, logical right, and arithmetic right shifts on the value in register rs1 by the shift amount held in the lower 5 bits of register rs2.",
+      "spec_section": "2.4.2",
+      "python_verification": "t4 = 1; t5 = 3; t6 = t4 << (t5 & 0x1F)  # t6 = 8"
+    },
+    {
+      "name": "SRL SRA shift right operations",
+      "hint_marker": 12,
+      "instructions": ["SRL", "SRA"],
+      "initial_state": {
+        "registers": {"a4": "0x80000000", "t5": 3}
+      },
+      "expected_behavior": {
+        "registers": {
+          "a5": "0x10000000",
+          "a6": "0xF0000000"
+        }
+      },
+      "comment": "SLL, SRL, and SRA perform logical left, logical right, and arithmetic right shifts on the value in register rs1 by the shift amount held in the lower 5 bits of register rs2.",
+      "spec_section": "2.4.2",
+      "python_verification": "a4 = 0x80000000; t5 = 3; a5 = a4 >> t5  # a5=0x10000000 (logical); import ctypes; a6 = ctypes.c_int32(a4).value >> t5  # a6=0xF0000000 (arithmetic)"
+    },
+    {
+      "name": "SLT SLTU signed vs unsigned compare",
+      "hint_marker": 13,
+      "instructions": ["SLT", "SLTU"],
+      "initial_state": {
+        "registers": {"a0": -5, "a1": 10}
+      },
+      "expected_behavior": {
+        "registers": {
+          "a2": 1,
+          "a3": 0
+        }
+      },
+      "comment": "SLT and SLTU perform signed and unsigned compares respectively, writing 1 to rd if rs1 < rs2, 0 otherwise.",
+      "spec_section": "2.4.2",
+      "python_verification": "a0_signed = -5; a1 = 10; a2 = 1 if a0_signed < a1 else 0  # a2=1 (signed); a0_unsigned = 0xFFFFFFFB; a3 = 1 if a0_unsigned < a1 else 0  # a3=0 (unsigned -5 > 10)"
+    },
+    {
+      "name": "AND OR XOR bitwise register operations",
+      "hint_marker": 14,
+      "instructions": ["AND", "OR", "XOR"],
+      "initial_state": {
+        "registers": {"t0": "0xF0", "t1": "0x0F"}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t2": "0x00",
+          "t3": "0xFF",
+          "t4": "0xFF"
+        }
+      },
+      "comment": "AND, OR, and XOR perform bitwise logical operations.",
+      "spec_section": "2.4.2",
+      "python_verification": "t0 = 0xF0; t1 = 0x0F; t2 = t0 & t1; t3 = t0 | t1; t4 = t0 ^ t1  # t2=0x00, t3=0xFF, t4=0xFF"
+    }
+  ]
+}
