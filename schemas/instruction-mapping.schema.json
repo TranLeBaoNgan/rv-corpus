@@ -1,0 +1,163 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/portal-co/rv-corpus/schemas/instruction-mapping.schema.json",
+  "title": "RISC-V Instruction Mapping Schema",
+  "description": "Schema for RISC-V instruction mappings including encoding, format, and behavior specifications",
+  "type": "object",
+  "required": ["$schema", "isa", "version", "instructions"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Reference to this JSON schema"
+    },
+    "isa": {
+      "type": "string",
+      "description": "ISA variant (e.g., RV32I, RV64I, RV32IM)",
+      "pattern": "^RV(32|64)[A-Z]+((_[A-Z][a-z]+)+)?$"
+    },
+    "version": {
+      "type": "string",
+      "description": "Version of this mapping file",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "spec_reference": {
+      "type": "string",
+      "description": "URL to the RISC-V specification used"
+    },
+    "instructions": {
+      "type": "object",
+      "description": "Map of instruction mnemonics to their definitions",
+      "additionalProperties": {
+        "$ref": "#/definitions/instruction"
+      }
+    }
+  },
+  "definitions": {
+    "instruction": {
+      "type": "object",
+      "required": ["format", "encoding", "description", "comment"],
+      "properties": {
+        "format": {
+          "type": "string",
+          "description": "Instruction format type",
+          "enum": ["R-type", "I-type", "S-type", "B-type", "U-type", "J-type", "R4-type", "CSR"]
+        },
+        "encoding": {
+          "$ref": "#/definitions/encoding"
+        },
+        "assembly_syntax": {
+          "type": "string",
+          "description": "Assembly syntax pattern (e.g., 'rd, rs1, imm')"
+        },
+        "description": {
+          "type": "string",
+          "description": "Brief description of what the instruction does"
+        },
+        "comment": {
+          "type": "string",
+          "description": "Verbatim quote from the RISC-V specification describing this instruction"
+        },
+        "spec_section": {
+          "type": "string",
+          "description": "Section reference in the RISC-V specification"
+        },
+        "operation": {
+          "type": "string",
+          "description": "Pseudocode or formula describing the operation"
+        },
+        "exceptions": {
+          "type": "array",
+          "description": "List of exceptions this instruction can raise",
+          "items": {
+            "type": "string"
+          }
+        },
+        "extensions": {
+          "type": "array",
+          "description": "Required extensions for this instruction",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "array",
+          "description": "Additional notes about the instruction",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "encoding": {
+      "type": "object",
+      "required": ["opcode"],
+      "properties": {
+        "opcode": {
+          "type": "string",
+          "description": "7-bit opcode field (bits 6:0)",
+          "pattern": "^0b[01]{7}$"
+        },
+        "funct3": {
+          "type": "string",
+          "description": "3-bit function field (bits 14:12)",
+          "pattern": "^0b[01]{3}$"
+        },
+        "funct7": {
+          "type": "string",
+          "description": "7-bit function field (bits 31:25)",
+          "pattern": "^0b[01]{7}$"
+        },
+        "funct5": {
+          "type": "string",
+          "description": "5-bit function field for atomic instructions (bits 31:27)",
+          "pattern": "^0b[01]{5}$"
+        },
+        "funct2": {
+          "type": "string",
+          "description": "2-bit function field for R4-type instructions (bits 26:25)",
+          "pattern": "^0b[01]{2}$"
+        },
+        "rs1": {
+          "type": "string",
+          "description": "Source register 1 field description"
+        },
+        "rs2": {
+          "type": "string",
+          "description": "Source register 2 field description"
+        },
+        "rs3": {
+          "type": "string",
+          "description": "Source register 3 field for R4-type instructions"
+        },
+        "rd": {
+          "type": "string",
+          "description": "Destination register field description"
+        },
+        "imm": {
+          "type": "string",
+          "description": "Immediate field description"
+        },
+        "rm": {
+          "type": "string",
+          "description": "Rounding mode field for floating-point instructions"
+        },
+        "aq": {
+          "type": "string",
+          "description": "Acquire bit for atomic instructions"
+        },
+        "rl": {
+          "type": "string",
+          "description": "Release bit for atomic instructions"
+        },
+        "csr": {
+          "type": "string",
+          "description": "CSR address field for CSR instructions"
+        },
+        "full_encoding": {
+          "type": "string",
+          "description": "Full 32-bit encoding pattern with field placeholders"
+        }
+      }
+    }
+  }
+}
