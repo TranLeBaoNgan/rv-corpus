@@ -1,0 +1,76 @@
+{
+  "$schema": "../../schemas/test-mapping.schema.json",
+  "test_file": "rv32i/05_simple_program.s",
+  "isa": "RV32I",
+  "version": "1.0.0",
+  "spec_reference": "https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html",
+  "description": "Tests practical programs using RV32I instructions: factorial, fibonacci, and array sum. Demonstrates function calls, recursion, and loops. HINT instructions (addi x0, x0, N) mark test case N.",
+  "test_cases": [
+    {
+      "name": "Factorial computation",
+      "hint_marker": 1,
+      "instructions": ["JAL", "JALR", "ADDI", "SW", "LW", "BLE", "ADD", "BEQ", "J"],
+      "initial_state": {
+        "registers": {"a0": 5}
+      },
+      "expected_behavior": {
+        "registers": {
+          "s0": 120
+        }
+      },
+      "comment": "Computes factorial using recursive function calls. Tests JAL for function calls and JALR for returns. Uses stack operations (SW/LW with sp) to preserve registers across calls.",
+      "spec_section": "2.5.1",
+      "python_verification": "import math; s0 = math.factorial(5)  # s0 = 120",
+      "notes": [
+        "Factorial implemented using recursion",
+        "Multiplication done via repeated addition (RV32I has no MUL)",
+        "Stack frame setup with sp adjustments"
+      ]
+    },
+    {
+      "name": "Fibonacci computation",
+      "hint_marker": 2,
+      "instructions": ["JAL", "JALR", "ADDI", "SW", "LW", "BLE", "ADD", "MV"],
+      "initial_state": {
+        "registers": {"a0": 10}
+      },
+      "expected_behavior": {
+        "registers": {
+          "s1": 55
+        }
+      },
+      "comment": "Computes fibonacci using recursive function calls. Tests nested recursive calls and register preservation across function boundaries.",
+      "spec_section": "2.5.1",
+      "python_verification": "def fib(n): return n if n <= 1 else fib(n-1) + fib(n-2); s1 = fib(10)  # s1 = 55",
+      "notes": [
+        "Fibonacci implemented using double recursion",
+        "Callee-saved registers s0, s1 preserved on stack",
+        "Tests proper stack frame management"
+      ]
+    },
+    {
+      "name": "Array sum",
+      "hint_marker": 3,
+      "instructions": ["LA", "LW", "ADD", "SLLI", "BGE", "ADDI", "J", "MV", "JALR"],
+      "initial_state": {
+        "memory": {
+          "test_array": "[1, 2, 3, 4, 5]"
+        },
+        "registers": {"a1": 5}
+      },
+      "expected_behavior": {
+        "registers": {
+          "s2": 15
+        }
+      },
+      "comment": "Computes sum of array elements using a loop. Tests address calculation, memory loads, and loop control.",
+      "spec_section": "2.6",
+      "python_verification": "test_array = [1, 2, 3, 4, 5]; s2 = sum(test_array)  # s2 = 15",
+      "notes": [
+        "Array iteration using index and address calculation",
+        "SLLI used to compute word offset (index * 4)",
+        "Loop controlled by BGE comparison"
+      ]
+    }
+  ]
+}

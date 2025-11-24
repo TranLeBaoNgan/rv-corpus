@@ -1,0 +1,38 @@
+# Compiled binaries (ELF files without extension)
+rv32i/01_integer_computational
+rv32i/02_control_transfer
+rv32i/03_load_store
+rv32i/04_edge_cases
+rv32i/05_simple_program
+rv32i/06_nop_and_hints
+rv32i/07_pseudo_instructions
+rv32im/01_multiply_divide
+rv32ima/01_atomic_operations
+rv64i/01_basic_64bit
+rv64im/01_multiply_divide_64
+rv32i_zicsr/01_csr_instructions
+rv32f/01_single_precision_fp
+rv32d/01_double_precision_fp
+rv32fd/01_combined_fp
+rv64d/01_rv64_double_precision_fp
+
+# Build artifacts
+*.o
+*.a
+*.so
+*.x86
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temp files
+/tmp/
+*.tmp

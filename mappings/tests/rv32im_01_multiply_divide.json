@@ -1,0 +1,315 @@
+{
+  "$schema": "../../schemas/test-mapping.schema.json",
+  "test_file": "rv32im/01_multiply_divide.s",
+  "isa": "RV32IM",
+  "version": "1.0.0",
+  "spec_reference": "https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html",
+  "description": "Tests RV32IM multiply and divide instructions including MUL, MULH, MULHSU, MULHU, DIV, DIVU, REM, REMU. HINT instructions (addi x0, x0, N) mark test case N.",
+  "test_cases": [
+    {
+      "name": "MUL basic multiplication",
+      "hint_marker": 1,
+      "instructions": ["MUL"],
+      "initial_state": {
+        "registers": {"a0": 10, "a1": 20}
+      },
+      "expected_behavior": {
+        "registers": {
+          "a2": 200
+        }
+      },
+      "comment": "MUL performs an XLEN-bit×XLEN-bit multiplication of rs1 by rs2 and places the lower XLEN bits in the destination register.",
+      "spec_section": "7.1",
+      "python_verification": "a0 = 10; a1 = 20; a2 = a0 * a1  # a2 = 200"
+    },
+    {
+      "name": "MUL with negative numbers",
+      "hint_marker": 2,
+      "instructions": ["MUL"],
+      "initial_state": {
+        "registers": {"t0": -5, "t1": 6}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t2": -30
+        }
+      },
+      "comment": "MUL performs an XLEN-bit×XLEN-bit multiplication of rs1 by rs2 and places the lower XLEN bits in the destination register.",
+      "spec_section": "7.1",
+      "python_verification": "import ctypes; t0 = -5; t1 = 6; t2 = ctypes.c_int32(t0 * t1).value  # t2 = -30"
+    },
+    {
+      "name": "MUL overflow case",
+      "hint_marker": 3,
+      "instructions": ["MUL"],
+      "initial_state": {
+        "registers": {"t3": "0x10000", "t4": "0x10000"}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t5": 0
+        }
+      },
+      "comment": "MUL performs an XLEN-bit×XLEN-bit multiplication of rs1 by rs2 and places the lower XLEN bits in the destination register.",
+      "spec_section": "7.1",
+      "python_verification": "t3 = 0x10000; t4 = 0x10000; t5 = (t3 * t4) & 0xFFFFFFFF  # t5 = 0 (lower 32 bits of 0x100000000)",
+      "edge_case": true
+    },
+    {
+      "name": "MULH signed × signed upper bits",
+      "hint_marker": 4,
+      "instructions": ["MULH"],
+      "initial_state": {
+        "registers": {"s0": -5, "s1": 6}
+      },
+      "expected_behavior": {
+        "registers": {
+          "s2": -1
+        }
+      },
+      "comment": "MULH, MULHU, and MULHSU perform the same multiplication but return the upper XLEN bits of the full 2×XLEN-bit product, for signed×signed, unsigned×unsigned, and signed rs1×unsigned rs2 multiplication, respectively.",
+      "spec_section": "7.1",
+      "python_verification": "s0 = -5; s1 = 6; full_result = s0 * s1; s2 = full_result >> 32  # s2 = -1 (sign extended)"
+    },
+    {
+      "name": "MULHU unsigned × unsigned upper bits",
+      "hint_marker": 5,
+      "instructions": ["MULHU"],
+      "initial_state": {
+        "registers": {"s3": "0xFFFFFFFF", "s4": 2}
+      },
+      "expected_behavior": {
+        "registers": {
+          "s5": 1
+        }
+      },
+      "comment": "MULHU returns the upper XLEN bits of the full 2×XLEN-bit product for unsigned×unsigned multiplication.",
+      "spec_section": "7.1",
+      "python_verification": "s3 = 0xFFFFFFFF; s4 = 2; full_result = s3 * s4; s5 = full_result >> 32  # s5 = 1"
+    },
+    {
+      "name": "MULHSU signed × unsigned",
+      "hint_marker": 6,
+      "instructions": ["MULHSU"],
+      "initial_state": {
+        "registers": {"s6": -1, "s7": 2}
+      },
+      "expected_behavior": {
+        "registers": {
+          "s8": -1
+        }
+      },
+      "comment": "MULHSU performs a signed rs1 × unsigned rs2 multiplication, returning the upper XLEN bits of the full 2×XLEN-bit product.",
+      "spec_section": "7.1",
+      "python_verification": "s6 = -1; s7 = 2; full_result = s6 * s7; s8 = full_result >> 32  # s8 = -1 (sign extended)"
+    },
+    {
+      "name": "Large multiplication with MULH",
+      "hint_marker": 7,
+      "instructions": ["MUL", "MULH"],
+      "initial_state": {
+        "registers": {"a3": "0x7FFFFFFF", "a4": 2}
+      },
+      "expected_behavior": {
+        "registers": {
+          "a5": "0xFFFFFFFE",
+          "a6": 0
+        }
+      },
+      "comment": "To obtain the full product, use MUL and MULH together to get lower and upper halves.",
+      "spec_section": "7.1",
+      "python_verification": "a3 = 0x7FFFFFFF; a4 = 2; a5 = (a3 * a4) & 0xFFFFFFFF; a6 = (a3 * a4) >> 32  # a5 = 0xFFFFFFFE, a6 = 0"
+    },
+    {
+      "name": "DIV and REM basic division",
+      "hint_marker": 8,
+      "instructions": ["DIV", "REM"],
+      "initial_state": {
+        "registers": {"t0": 100, "t1": 10}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t2": 10,
+          "t3": 0
+        }
+      },
+      "comment": "DIV and DIVU perform an XLEN bits by XLEN bits signed and unsigned integer division of rs1 by rs2, rounding towards zero.",
+      "spec_section": "7.2",
+      "python_verification": "t0 = 100; t1 = 10; t2 = t0 // t1; t3 = t0 % t1  # t2 = 10, t3 = 0"
+    },
+    {
+      "name": "Division with remainder",
+      "hint_marker": 9,
+      "instructions": ["DIV", "REM"],
+      "initial_state": {
+        "registers": {"t4": 100, "t5": 7}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t6": 14,
+          "a7": 2
+        }
+      },
+      "comment": "DIV and DIVU perform an XLEN bits by XLEN bits signed and unsigned integer division of rs1 by rs2, rounding towards zero.",
+      "spec_section": "7.2",
+      "python_verification": "t4 = 100; t5 = 7; t6 = t4 // t5; a7 = t4 % t5  # t6 = 14, a7 = 2"
+    },
+    {
+      "name": "Division by zero",
+      "hint_marker": 10,
+      "instructions": ["DIV", "DIVU"],
+      "initial_state": {
+        "registers": {"s0": 100, "s1": 0}
+      },
+      "expected_behavior": {
+        "registers": {
+          "s2": -1,
+          "s3": "0xFFFFFFFF"
+        }
+      },
+      "comment": "The quotient of division by zero has all bits set, i.e. 2^XLEN−1 for unsigned division or −1 for signed division.",
+      "spec_section": "7.2",
+      "edge_case": true,
+      "notes": ["DIV by 0 returns -1", "DIVU by 0 returns 0xFFFFFFFF"]
+    },
+    {
+      "name": "Remainder of division by zero",
+      "hint_marker": 11,
+      "instructions": ["REM", "REMU"],
+      "initial_state": {
+        "registers": {"s0": 100, "s1": 0}
+      },
+      "expected_behavior": {
+        "registers": {
+          "s4": 100,
+          "s5": 100
+        }
+      },
+      "comment": "The remainder of division by zero equals the dividend.",
+      "spec_section": "7.2",
+      "edge_case": true
+    },
+    {
+      "name": "Signed division with negative dividend",
+      "hint_marker": 12,
+      "instructions": ["DIV", "REM"],
+      "initial_state": {
+        "registers": {"a0": -100, "a1": 10}
+      },
+      "expected_behavior": {
+        "registers": {
+          "a2": -10,
+          "a3": 0
+        }
+      },
+      "comment": "DIV and DIVU perform an XLEN bits by XLEN bits signed and unsigned integer division of rs1 by rs2, rounding towards zero.",
+      "spec_section": "7.2",
+      "python_verification": "import ctypes; a0 = -100; a1 = 10; a2 = int(a0 / a1); a3 = a0 - (a2 * a1)  # a2 = -10, a3 = 0"
+    },
+    {
+      "name": "Signed division with remainder",
+      "hint_marker": 13,
+      "instructions": ["DIV", "REM"],
+      "initial_state": {
+        "registers": {"a4": -100, "a5": 7}
+      },
+      "expected_behavior": {
+        "registers": {
+          "a6": -14,
+          "a7": -2
+        }
+      },
+      "comment": "For REM, the sign of a nonzero remainder equals the sign of the dividend.",
+      "spec_section": "7.2",
+      "python_verification": "import ctypes; a4 = -100; a5 = 7; a6 = int(a4 / a5); a7 = a4 - (a6 * a5)  # a6 = -14, a7 = -2",
+      "notes": ["Remainder has sign of dividend"]
+    },
+    {
+      "name": "DIVU and REMU unsigned division",
+      "hint_marker": 14,
+      "instructions": ["DIVU", "REMU"],
+      "initial_state": {
+        "registers": {"t0": "0xFFFFFFFF", "t1": 2}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t2": "0x7FFFFFFF",
+          "t3": 1
+        }
+      },
+      "comment": "DIV and DIVU perform an XLEN bits by XLEN bits signed and unsigned integer division of rs1 by rs2, rounding towards zero.",
+      "spec_section": "7.2",
+      "python_verification": "t0 = 0xFFFFFFFF; t1 = 2; t2 = t0 // t1; t3 = t0 % t1  # t2 = 0x7FFFFFFF, t3 = 1"
+    },
+    {
+      "name": "Signed division overflow",
+      "hint_marker": 15,
+      "instructions": ["DIV", "REM"],
+      "initial_state": {
+        "registers": {"s6": "0x80000000", "s7": -1}
+      },
+      "expected_behavior": {
+        "registers": {
+          "s8": "0x80000000",
+          "s9": 0
+        }
+      },
+      "comment": "The quotient of signed division with overflow is equal to the dividend. The remainder of signed division with overflow is zero.",
+      "spec_section": "7.2",
+      "edge_case": true,
+      "notes": ["MIN_INT / -1 overflows", "Quotient = dividend", "Remainder = 0"]
+    },
+    {
+      "name": "Unsigned division",
+      "hint_marker": 16,
+      "instructions": ["DIVU", "REMU"],
+      "initial_state": {
+        "registers": {"t4": 1000, "t5": 3}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t6": 333,
+          "a0": 1
+        }
+      },
+      "comment": "DIV and DIVU perform an XLEN bits by XLEN bits signed and unsigned integer division of rs1 by rs2, rounding towards zero.",
+      "spec_section": "7.2",
+      "python_verification": "t4 = 1000; t5 = 3; t6 = t4 // t5; a0 = t4 % t5  # t6 = 333, a0 = 1"
+    },
+    {
+      "name": "Division resulting in zero",
+      "hint_marker": 17,
+      "instructions": ["DIV", "REM"],
+      "initial_state": {
+        "registers": {"a1": 5, "a2": 100}
+      },
+      "expected_behavior": {
+        "registers": {
+          "a3": 0,
+          "a4": 5
+        }
+      },
+      "comment": "DIV and DIVU perform an XLEN bits by XLEN bits signed and unsigned integer division of rs1 by rs2, rounding towards zero.",
+      "spec_section": "7.2",
+      "python_verification": "a1 = 5; a2 = 100; a3 = a1 // a2; a4 = a1 % a2  # a3 = 0, a4 = 5"
+    },
+    {
+      "name": "Chained multiply and divide",
+      "hint_marker": 18,
+      "instructions": ["MUL", "DIV", "REM"],
+      "initial_state": {
+        "registers": {"s0": 10, "s1": 5, "s2": 3}
+      },
+      "expected_behavior": {
+        "registers": {
+          "s3": 50,
+          "s4": 16,
+          "s5": 2
+        }
+      },
+      "comment": "Chained multiplication and division operations.",
+      "spec_section": "7.1, 7.2",
+      "python_verification": "s0 = 10; s1 = 5; s2 = 3; s3 = s0 * s1; s4 = s3 // s2; s5 = s3 % s2  # s3 = 50, s4 = 16, s5 = 2"
+    }
+  ]
+}

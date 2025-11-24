@@ -1,24 +1,38 @@
 # RV32I Simple Practical Program
 # A simple program that computes factorial and fibonacci
 # Tests combination of instructions in real-world scenarios
+#
+# Test mapping: mappings/tests/rv32i_05_simple_program.json
+# HINT instructions mark test case boundaries (HINT N = test case N)
 
 .globl _start
 .section .text
 
 _start:
+    # ==========================================================================
+    # HINT 1: Test factorial computation
     # Compute factorial of 5 (5! = 120)
+    # ==========================================================================
+    addi x0, x0, 1          # HINT 1: Factorial computation test
     li a0, 5
     jal ra, factorial
     # Result in a0
     mv s0, a0               # Save result
     
+    # ==========================================================================
+    # HINT 2: Test fibonacci computation
     # Compute fibonacci of 10
+    # ==========================================================================
+    addi x0, x0, 2          # HINT 2: Fibonacci computation test
     li a0, 10
     jal ra, fibonacci
     # Result in a0
     mv s1, a0               # Save result
     
-    # Test array sum
+    # ==========================================================================
+    # HINT 3: Test array sum
+    # ==========================================================================
+    addi x0, x0, 3          # HINT 3: Array sum test
     la a0, test_array
     li a1, 5                # Array length
     jal ra, array_sum
