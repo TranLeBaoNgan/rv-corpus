@@ -4,7 +4,11 @@
 #
 # Test mapping: mappings/tests/rv32i_06_nop_and_hints.json
 # HINT instructions mark test case boundaries (HINT N = test case N)
-# NOTE: This file tests HINT behavior itself, so test markers use high values (100+)
+#
+# SPECIAL CASE: This file tests HINT behavior itself, so test markers use
+# values 100+ to avoid confusion with the low-numbered HINT values being
+# tested (e.g., addi x0, x0, 1). This is within the valid range (1-2047)
+# and provides clear separation between test markers and test content.
 
 .globl _start
 .section .text

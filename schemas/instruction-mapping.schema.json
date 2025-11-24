@@ -24,6 +24,11 @@
       "type": "string",
       "description": "URL to the RISC-V specification used"
     },
+    "extends": {
+      "type": "string",
+      "description": "Base ISA that this mapping extends (e.g., RV32I for RV32IM). When present, this mapping only includes additional instructions beyond the base ISA.",
+      "pattern": "^RV(32|64)[A-Z]+((_[A-Z][a-z]+)+)?$"
+    },
     "instructions": {
       "type": "object",
       "description": "Map of instruction mnemonics to their definitions",
