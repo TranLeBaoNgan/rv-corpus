@@ -1,0 +1,250 @@
+{
+  "$schema": "../schemas/instruction-mapping.schema.json",
+  "isa": "RV32IMA",
+  "version": "1.0.0",
+  "spec_reference": "https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html",
+  "extends": "RV32IM",
+  "instructions": {
+    "LR.W": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0101111",
+        "funct5": "0b00010",
+        "funct3": "0b010",
+        "rd": "bits 11:7 (destination register)",
+        "rs1": "bits 19:15 (address register)",
+        "rs2": "00000",
+        "aq": "bit 26 (acquire)",
+        "rl": "bit 25 (release)",
+        "full_encoding": "00010 | aq | rl | 00000 | rs1[19:15] | 010 | rd[11:7] | 0101111"
+      },
+      "assembly_syntax": "rd, (rs1)",
+      "description": "Load-Reserved Word",
+      "comment": "LR.W loads a word from the address in rs1, places the sign-extended value in rd, and registers a reservation on the memory address.",
+      "spec_section": "8.2",
+      "operation": "x[rd] = sext(M[x[rs1]][31:0]); reserve(x[rs1])"
+    },
+    "SC.W": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0101111",
+        "funct5": "0b00011",
+        "funct3": "0b010",
+        "rd": "bits 11:7 (destination register)",
+        "rs1": "bits 19:15 (address register)",
+        "rs2": "bits 24:20 (source register)",
+        "aq": "bit 26 (acquire)",
+        "rl": "bit 25 (release)",
+        "full_encoding": "00011 | aq | rl | rs2[24:20] | rs1[19:15] | 010 | rd[11:7] | 0101111"
+      },
+      "assembly_syntax": "rd, rs2, (rs1)",
+      "description": "Store-Conditional Word",
+      "comment": "SC.W conditionally writes a word in rs2 to the address in rs1. The SC.W succeeds only if the reservation is still valid and the reservation set contains the bytes being written. If successful, zero is written to rd; otherwise a nonzero value is written to rd.",
+      "spec_section": "8.2",
+      "operation": "if reserved(x[rs1]) { M[x[rs1]] = x[rs2][31:0]; x[rd] = 0 } else { x[rd] = 1 }"
+    },
+    "AMOSWAP.W": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0101111",
+        "funct5": "0b00001",
+        "funct3": "0b010",
+        "rd": "bits 11:7 (destination register)",
+        "rs1": "bits 19:15 (address register)",
+        "rs2": "bits 24:20 (source register)",
+        "aq": "bit 26 (acquire)",
+        "rl": "bit 25 (release)",
+        "full_encoding": "00001 | aq | rl | rs2[24:20] | rs1[19:15] | 010 | rd[11:7] | 0101111"
+      },
+      "assembly_syntax": "rd, rs2, (rs1)",
+      "description": "Atomic swap word",
+      "comment": "AMOSWAP.W loads the word at address rs1, then writes the value from rs2 to the address in rs1. The value loaded is placed in rd.",
+      "spec_section": "8.3",
+      "operation": "t = M[x[rs1]]; M[x[rs1]] = x[rs2]; x[rd] = t"
+    },
+    "AMOADD.W": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0101111",
+        "funct5": "0b00000",
+        "funct3": "0b010",
+        "rd": "bits 11:7 (destination register)",
+        "rs1": "bits 19:15 (address register)",
+        "rs2": "bits 24:20 (source register)",
+        "aq": "bit 26 (acquire)",
+        "rl": "bit 25 (release)",
+        "full_encoding": "00000 | aq | rl | rs2[24:20] | rs1[19:15] | 010 | rd[11:7] | 0101111"
+      },
+      "assembly_syntax": "rd, rs2, (rs1)",
+      "description": "Atomic add word",
+      "comment": "AMOADD.W loads the word at address rs1, adds the value in rs2, then writes the result to the address in rs1. The original value is placed in rd.",
+      "spec_section": "8.3",
+      "operation": "t = M[x[rs1]]; M[x[rs1]] = t + x[rs2]; x[rd] = t"
+    },
+    "AMOXOR.W": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0101111",
+        "funct5": "0b00100",
+        "funct3": "0b010",
+        "rd": "bits 11:7 (destination register)",
+        "rs1": "bits 19:15 (address register)",
+        "rs2": "bits 24:20 (source register)",
+        "aq": "bit 26 (acquire)",
+        "rl": "bit 25 (release)",
+        "full_encoding": "00100 | aq | rl | rs2[24:20] | rs1[19:15] | 010 | rd[11:7] | 0101111"
+      },
+      "assembly_syntax": "rd, rs2, (rs1)",
+      "description": "Atomic XOR word",
+      "comment": "AMOXOR.W atomically XORs the value in memory with rs2.",
+      "spec_section": "8.3",
+      "operation": "t = M[x[rs1]]; M[x[rs1]] = t ^ x[rs2]; x[rd] = t"
+    },
+    "AMOAND.W": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0101111",
+        "funct5": "0b01100",
+        "funct3": "0b010",
+        "rd": "bits 11:7 (destination register)",
+        "rs1": "bits 19:15 (address register)",
+        "rs2": "bits 24:20 (source register)",
+        "aq": "bit 26 (acquire)",
+        "rl": "bit 25 (release)",
+        "full_encoding": "01100 | aq | rl | rs2[24:20] | rs1[19:15] | 010 | rd[11:7] | 0101111"
+      },
+      "assembly_syntax": "rd, rs2, (rs1)",
+      "description": "Atomic AND word",
+      "comment": "AMOAND.W atomically ANDs the value in memory with rs2.",
+      "spec_section": "8.3",
+      "operation": "t = M[x[rs1]]; M[x[rs1]] = t & x[rs2]; x[rd] = t"
+    },
+    "AMOOR.W": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0101111",
+        "funct5": "0b01000",
+        "funct3": "0b010",
+        "rd": "bits 11:7 (destination register)",
+        "rs1": "bits 19:15 (address register)",
+        "rs2": "bits 24:20 (source register)",
+        "aq": "bit 26 (acquire)",
+        "rl": "bit 25 (release)",
+        "full_encoding": "01000 | aq | rl | rs2[24:20] | rs1[19:15] | 010 | rd[11:7] | 0101111"
+      },
+      "assembly_syntax": "rd, rs2, (rs1)",
+      "description": "Atomic OR word",
+      "comment": "AMOOR.W atomically ORs the value in memory with rs2.",
+      "spec_section": "8.3",
+      "operation": "t = M[x[rs1]]; M[x[rs1]] = t | x[rs2]; x[rd] = t"
+    },
+    "AMOMIN.W": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0101111",
+        "funct5": "0b10000",
+        "funct3": "0b010",
+        "rd": "bits 11:7 (destination register)",
+        "rs1": "bits 19:15 (address register)",
+        "rs2": "bits 24:20 (source register)",
+        "aq": "bit 26 (acquire)",
+        "rl": "bit 25 (release)",
+        "full_encoding": "10000 | aq | rl | rs2[24:20] | rs1[19:15] | 010 | rd[11:7] | 0101111"
+      },
+      "assembly_syntax": "rd, rs2, (rs1)",
+      "description": "Atomic signed minimum word",
+      "comment": "AMOMIN.W loads the word at address rs1, compares it with the value in rs2 treating both as signed numbers, then writes the smaller value to the address in rs1.",
+      "spec_section": "8.3",
+      "operation": "t = M[x[rs1]]; M[x[rs1]] = min_s(t, x[rs2]); x[rd] = t"
+    },
+    "AMOMAX.W": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0101111",
+        "funct5": "0b10100",
+        "funct3": "0b010",
+        "rd": "bits 11:7 (destination register)",
+        "rs1": "bits 19:15 (address register)",
+        "rs2": "bits 24:20 (source register)",
+        "aq": "bit 26 (acquire)",
+        "rl": "bit 25 (release)",
+        "full_encoding": "10100 | aq | rl | rs2[24:20] | rs1[19:15] | 010 | rd[11:7] | 0101111"
+      },
+      "assembly_syntax": "rd, rs2, (rs1)",
+      "description": "Atomic signed maximum word",
+      "comment": "AMOMAX.W loads the word at address rs1, compares it with the value in rs2 treating both as signed numbers, then writes the larger value to the address in rs1.",
+      "spec_section": "8.3",
+      "operation": "t = M[x[rs1]]; M[x[rs1]] = max_s(t, x[rs2]); x[rd] = t"
+    },
+    "AMOMINU.W": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0101111",
+        "funct5": "0b11000",
+        "funct3": "0b010",
+        "rd": "bits 11:7 (destination register)",
+        "rs1": "bits 19:15 (address register)",
+        "rs2": "bits 24:20 (source register)",
+        "aq": "bit 26 (acquire)",
+        "rl": "bit 25 (release)",
+        "full_encoding": "11000 | aq | rl | rs2[24:20] | rs1[19:15] | 010 | rd[11:7] | 0101111"
+      },
+      "assembly_syntax": "rd, rs2, (rs1)",
+      "description": "Atomic unsigned minimum word",
+      "comment": "AMOMINU.W atomically computes unsigned minimum.",
+      "spec_section": "8.3",
+      "operation": "t = M[x[rs1]]; M[x[rs1]] = min_u(t, x[rs2]); x[rd] = t"
+    },
+    "AMOMAXU.W": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0101111",
+        "funct5": "0b11100",
+        "funct3": "0b010",
+        "rd": "bits 11:7 (destination register)",
+        "rs1": "bits 19:15 (address register)",
+        "rs2": "bits 24:20 (source register)",
+        "aq": "bit 26 (acquire)",
+        "rl": "bit 25 (release)",
+        "full_encoding": "11100 | aq | rl | rs2[24:20] | rs1[19:15] | 010 | rd[11:7] | 0101111"
+      },
+      "assembly_syntax": "rd, rs2, (rs1)",
+      "description": "Atomic unsigned maximum word",
+      "comment": "AMOMAXU.W atomically computes unsigned maximum.",
+      "spec_section": "8.3",
+      "operation": "t = M[x[rs1]]; M[x[rs1]] = max_u(t, x[rs2]); x[rd] = t"
+    },
+    "FENCE": {
+      "format": "I-type",
+      "encoding": {
+        "opcode": "0b0001111",
+        "funct3": "0b000",
+        "rd": "00000",
+        "rs1": "00000",
+        "imm": "bits 31:20 (predecessor/successor ordering)",
+        "full_encoding": "fm[31:28] | pred[27:24] | succ[23:20] | 00000 | 000 | 00000 | 0001111"
+      },
+      "assembly_syntax": "pred, succ",
+      "description": "Fence Memory and I/O",
+      "comment": "The FENCE instruction is used to order device I/O and memory accesses as viewed by other RISC-V harts and external devices.",
+      "spec_section": "2.7",
+      "operation": "fence(pred, succ)"
+    },
+    "FENCE.I": {
+      "format": "I-type",
+      "encoding": {
+        "opcode": "0b0001111",
+        "funct3": "0b001",
+        "rd": "00000",
+        "rs1": "00000",
+        "imm": "000000000000",
+        "full_encoding": "000000000000 | 00000 | 001 | 00000 | 0001111"
+      },
+      "assembly_syntax": "",
+      "description": "Fence Instruction",
+      "comment": "FENCE.I is used to synchronize the instruction and data streams.",
+      "spec_section": "2.7",
+      "operation": "fence.i()"
+    }
+  }
+}

@@ -1,0 +1,160 @@
+{
+  "$schema": "../schemas/instruction-mapping.schema.json",
+  "isa": "RV32IM",
+  "version": "1.0.0",
+  "spec_reference": "https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html",
+  "extends": "RV32I",
+  "instructions": {
+    "MUL": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0110011",
+        "funct3": "0b000",
+        "funct7": "0b0000001",
+        "rd": "bits 11:7",
+        "rs1": "bits 19:15",
+        "rs2": "bits 24:20",
+        "full_encoding": "0000001 | rs2[24:20] | rs1[19:15] | 000 | rd[11:7] | 0110011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Multiply - multiplies rs1 by rs2 and places lower XLEN bits in rd",
+      "comment": "MUL performs an XLEN-bit×XLEN-bit multiplication of rs1 by rs2 and places the lower XLEN bits in the destination register.",
+      "spec_section": "7.1",
+      "operation": "rd = (rs1 * rs2)[XLEN-1:0]"
+    },
+    "MULH": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0110011",
+        "funct3": "0b001",
+        "funct7": "0b0000001",
+        "rd": "bits 11:7",
+        "rs1": "bits 19:15",
+        "rs2": "bits 24:20",
+        "full_encoding": "0000001 | rs2[24:20] | rs1[19:15] | 001 | rd[11:7] | 0110011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Multiply High Signed×Signed - returns upper XLEN bits of signed×signed multiplication",
+      "comment": "MULH, MULHU, and MULHSU perform the same multiplication but return the upper XLEN bits of the full 2×XLEN-bit product, for signed×signed, unsigned×unsigned, and signed rs1×unsigned rs2 multiplication, respectively.",
+      "spec_section": "7.1",
+      "operation": "rd = (sext(rs1) * sext(rs2))[2*XLEN-1:XLEN]"
+    },
+    "MULHSU": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0110011",
+        "funct3": "0b010",
+        "funct7": "0b0000001",
+        "rd": "bits 11:7",
+        "rs1": "bits 19:15",
+        "rs2": "bits 24:20",
+        "full_encoding": "0000001 | rs2[24:20] | rs1[19:15] | 010 | rd[11:7] | 0110011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Multiply High Signed×Unsigned - returns upper XLEN bits of signed×unsigned multiplication",
+      "comment": "MULHSU performs a signed rs1 × unsigned rs2 multiplication, returning the upper XLEN bits of the full 2×XLEN-bit product.",
+      "spec_section": "7.1",
+      "operation": "rd = (sext(rs1) * zext(rs2))[2*XLEN-1:XLEN]"
+    },
+    "MULHU": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0110011",
+        "funct3": "0b011",
+        "funct7": "0b0000001",
+        "rd": "bits 11:7",
+        "rs1": "bits 19:15",
+        "rs2": "bits 24:20",
+        "full_encoding": "0000001 | rs2[24:20] | rs1[19:15] | 011 | rd[11:7] | 0110011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Multiply High Unsigned×Unsigned - returns upper XLEN bits of unsigned×unsigned multiplication",
+      "comment": "MULHU returns the upper XLEN bits of the full 2×XLEN-bit product for unsigned×unsigned multiplication.",
+      "spec_section": "7.1",
+      "operation": "rd = (zext(rs1) * zext(rs2))[2*XLEN-1:XLEN]"
+    },
+    "DIV": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0110011",
+        "funct3": "0b100",
+        "funct7": "0b0000001",
+        "rd": "bits 11:7",
+        "rs1": "bits 19:15",
+        "rs2": "bits 24:20",
+        "full_encoding": "0000001 | rs2[24:20] | rs1[19:15] | 100 | rd[11:7] | 0110011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Divide Signed - divides rs1 by rs2 treating both as signed",
+      "comment": "DIV and DIVU perform an XLEN bits by XLEN bits signed and unsigned integer division of rs1 by rs2, rounding towards zero.",
+      "spec_section": "7.2",
+      "operation": "rd = rs1 /s rs2 (signed division, round toward zero)",
+      "notes": [
+        "Division by zero: quotient = -1 (all bits set)",
+        "Overflow (MIN_INT / -1): quotient = dividend"
+      ]
+    },
+    "DIVU": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0110011",
+        "funct3": "0b101",
+        "funct7": "0b0000001",
+        "rd": "bits 11:7",
+        "rs1": "bits 19:15",
+        "rs2": "bits 24:20",
+        "full_encoding": "0000001 | rs2[24:20] | rs1[19:15] | 101 | rd[11:7] | 0110011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Divide Unsigned - divides rs1 by rs2 treating both as unsigned",
+      "comment": "DIV and DIVU perform an XLEN bits by XLEN bits signed and unsigned integer division of rs1 by rs2, rounding towards zero.",
+      "spec_section": "7.2",
+      "operation": "rd = rs1 /u rs2 (unsigned division)",
+      "notes": [
+        "Division by zero: quotient = 2^XLEN - 1 (all bits set)"
+      ]
+    },
+    "REM": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0110011",
+        "funct3": "0b110",
+        "funct7": "0b0000001",
+        "rd": "bits 11:7",
+        "rs1": "bits 19:15",
+        "rs2": "bits 24:20",
+        "full_encoding": "0000001 | rs2[24:20] | rs1[19:15] | 110 | rd[11:7] | 0110011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Remainder Signed - remainder of signed division",
+      "comment": "REM and REMU provide the remainder of the corresponding division operation. For REM, the sign of a nonzero remainder equals the sign of the dividend.",
+      "spec_section": "7.2",
+      "operation": "rd = rs1 %s rs2 (signed remainder)",
+      "notes": [
+        "Division by zero: remainder = dividend",
+        "Overflow (MIN_INT / -1): remainder = 0",
+        "Sign of remainder = sign of dividend"
+      ]
+    },
+    "REMU": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0110011",
+        "funct3": "0b111",
+        "funct7": "0b0000001",
+        "rd": "bits 11:7",
+        "rs1": "bits 19:15",
+        "rs2": "bits 24:20",
+        "full_encoding": "0000001 | rs2[24:20] | rs1[19:15] | 111 | rd[11:7] | 0110011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Remainder Unsigned - remainder of unsigned division",
+      "comment": "REM and REMU provide the remainder of the corresponding division operation.",
+      "spec_section": "7.2",
+      "operation": "rd = rs1 %u rs2 (unsigned remainder)",
+      "notes": [
+        "Division by zero: remainder = dividend"
+      ]
+    }
+  }
+}

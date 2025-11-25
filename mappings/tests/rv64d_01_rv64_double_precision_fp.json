@@ -1,0 +1,184 @@
+{
+  "$schema": "../../schemas/test-mapping.schema.json",
+  "test_file": "rv64d/01_rv64_double_precision_fp.s",
+  "isa": "RV64D",
+  "version": "1.0.0",
+  "spec_reference": "https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html",
+  "description": "Tests RV64D 64-bit double-precision floating-point instructions. HINT instructions (addi x0, x0, N) mark test case N.",
+  "test_cases": [
+    {
+      "name": "Load double-precision values",
+      "hint_marker": 1,
+      "instructions": ["FLD"],
+      "expected_behavior": {
+        "registers": {
+          "f0": "3.141592653589793",
+          "f1": "2.718281828459045"
+        }
+      },
+      "comment": "Load double-precision values for testing.",
+      "spec_section": "14.3"
+    },
+    {
+      "name": "FCVT.L.D convert double to signed 64-bit",
+      "hint_marker": 2,
+      "instructions": ["FCVT.L.D"],
+      "expected_behavior": {
+        "registers": {
+          "a0": 3,
+          "a1": 2
+        }
+      },
+      "comment": "FCVT.L.D converts a double-precision floating-point number in floating-point register rs1 to a signed 64-bit integer in integer register rd. FCVT.L[U].D and FCVT.D.L[U] are RV64-only instructions.",
+      "spec_section": "14.10"
+    },
+    {
+      "name": "FCVT.L.D with negative value",
+      "hint_marker": 3,
+      "instructions": ["FCVT.L.D"],
+      "expected_behavior": {
+        "registers": {
+          "a2": -123
+        }
+      },
+      "comment": "FCVT.L.D with negative double value.",
+      "spec_section": "14.10"
+    },
+    {
+      "name": "FCVT.LU.D convert double to unsigned 64-bit",
+      "hint_marker": 4,
+      "instructions": ["FCVT.LU.D"],
+      "expected_behavior": {
+        "registers": {
+          "a3": 3,
+          "a4": 2
+        }
+      },
+      "comment": "FCVT.LU.D converts a double-precision floating-point number to an unsigned 64-bit integer. FCVT.L[U].D and FCVT.D.L[U] are RV64-only instructions.",
+      "spec_section": "14.10"
+    },
+    {
+      "name": "FCVT.LU.D with large value",
+      "hint_marker": 5,
+      "instructions": ["FCVT.LU.D"],
+      "expected_behavior": {
+        "registers": {
+          "a5": "large uint64 value"
+        }
+      },
+      "comment": "FCVT.LU.D with large double value near uint64 max.",
+      "spec_section": "14.10"
+    },
+    {
+      "name": "FCVT.D.L convert signed 64-bit to double",
+      "hint_marker": 6,
+      "instructions": ["FCVT.D.L"],
+      "expected_behavior": {
+        "registers": {
+          "f4": "MAX_INT64 as double",
+          "f5": "MIN_INT64 as double",
+          "f6": 42.0
+        }
+      },
+      "comment": "FCVT.D.L converts a 64-bit signed integer in integer register rs1 into a double-precision floating-point number in floating-point register rd. FCVT.L[U].D and FCVT.D.L[U] are RV64-only instructions.",
+      "spec_section": "14.10"
+    },
+    {
+      "name": "FCVT.D.LU convert unsigned 64-bit to double",
+      "hint_marker": 7,
+      "instructions": ["FCVT.D.LU"],
+      "expected_behavior": {
+        "registers": {
+          "f7": "MAX_UINT64 as double",
+          "f8": "0x8000000000000000 as double",
+          "f9": 100.0
+        }
+      },
+      "comment": "FCVT.D.LU converts a 64-bit unsigned integer to a double-precision floating-point number. FCVT.L[U].D and FCVT.D.L[U] are RV64-only instructions.",
+      "spec_section": "14.10"
+    },
+    {
+      "name": "FMV.X.D move double bits to integer",
+      "hint_marker": 8,
+      "instructions": ["FMV.X.D"],
+      "expected_behavior": {
+        "registers": {
+          "s2": "IEEE 754 bit pattern of f0",
+          "s3": "IEEE 754 bit pattern of f1"
+        }
+      },
+      "comment": "FMV.X.D moves the double-precision value in floating-point register rs1 to a representation in IEEE 754-2008 standard encoding in integer register rd.",
+      "spec_section": "14.11"
+    },
+    {
+      "name": "FMV.D.X move integer bits to double",
+      "hint_marker": 9,
+      "instructions": ["FMV.D.X"],
+      "expected_behavior": {
+        "registers": {
+          "f10": "equals f0",
+          "f11": "equals f1"
+        }
+      },
+      "comment": "FMV.X.D and FMV.D.X do not modify the bits being transferred; in particular, the payloads of non-canonical NaNs are preserved.",
+      "spec_section": "14.11"
+    },
+    {
+      "name": "Arbitrary bit pattern",
+      "hint_marker": 10,
+      "instructions": ["FMV.D.X"],
+      "initial_state": {
+        "registers": {"s4": "0x4009220000000000"}
+      },
+      "expected_behavior": {
+        "registers": {
+          "f12": "~3.14159 from bit pattern"
+        }
+      },
+      "comment": "FMV.D.X with arbitrary IEEE 754 bit pattern.",
+      "spec_section": "14.11"
+    },
+    {
+      "name": "Combined convert and move",
+      "hint_marker": 11,
+      "instructions": ["FCVT.L.D", "FCVT.D.L", "FMV.X.D", "FMV.D.X"],
+      "expected_behavior": {
+        "registers": {
+          "s5": "truncated int64",
+          "f13": "int64 back to double",
+          "s6": "bit pattern",
+          "f14": "restored from bits"
+        }
+      },
+      "comment": "Combined conversion and move operations.",
+      "spec_section": "14.10, 14.11"
+    },
+    {
+      "name": "FCVT.W.D with 64-bit sign extension",
+      "hint_marker": 12,
+      "instructions": ["FCVT.W.D", "FCVT.WU.D"],
+      "expected_behavior": {
+        "registers": {
+          "s7": "32-bit result sign-extended to 64",
+          "s8": "32-bit result sign-extended to 64"
+        }
+      },
+      "comment": "For RV64, FCVT.W[U].D sign-extends the 32-bit result.",
+      "spec_section": "14.10"
+    },
+    {
+      "name": "Store converted results",
+      "hint_marker": 13,
+      "instructions": ["FSD"],
+      "expected_behavior": {
+        "memory": {
+          "fp_data+16": "f4 stored",
+          "fp_data+24": "f7 stored",
+          "fp_data+32": "f10 stored"
+        }
+      },
+      "comment": "Store converted values to memory.",
+      "spec_section": "14.3"
+    }
+  ]
+}

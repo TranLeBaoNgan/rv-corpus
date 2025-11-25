@@ -1,0 +1,193 @@
+{
+  "$schema": "../../schemas/test-mapping.schema.json",
+  "test_file": "rv64i/01_basic_64bit.s",
+  "isa": "RV64I",
+  "version": "1.0.0",
+  "spec_reference": "https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html",
+  "description": "Tests RV64I 64-bit base integer instructions. HINT instructions (addi x0, x0, N) mark test case N.",
+  "test_cases": [
+    {
+      "name": "64-bit immediate loading",
+      "hint_marker": 1,
+      "instructions": ["LI"],
+      "expected_behavior": {
+        "registers": {
+          "a0": "0x123456789ABCDEF0"
+        }
+      },
+      "comment": "RV64I widens the integer registers to 64 bits (XLEN=64).",
+      "spec_section": "5.1"
+    },
+    {
+      "name": "ADDIW add immediate word",
+      "hint_marker": 2,
+      "instructions": ["ADDIW"],
+      "initial_state": {
+        "registers": {"t0": "0x0000000080000000"}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t1": "0xFFFFFFFF8000000A"
+        }
+      },
+      "comment": "ADDIW is an RV64I-only instruction that adds the sign-extended 12-bit immediate to register rs1 and produces the proper sign extension of a 32-bit result in rd.",
+      "spec_section": "5.2",
+      "python_verification": "t0 = 0x80000000; t1 = ((t0 + 10) & 0xFFFFFFFF); t1 = t1 if t1 < 0x80000000 else t1 - 0x100000000"
+    },
+    {
+      "name": "SLLIW/SRLIW/SRAIW shift word immediate",
+      "hint_marker": 3,
+      "instructions": ["SLLIW", "SRLIW", "SRAIW"],
+      "expected_behavior": {
+        "registers": {
+          "t3": "0x23456780 sign-extended",
+          "t5": "0x0F000000 sign-extended",
+          "a0": "0xFF000000 sign-extended"
+        }
+      },
+      "comment": "SLLIW, SRLIW, and SRAIW are RV64I-only instructions that are analogous to SLLI, SRLI, and SRAI, but operate on 32-bit values and sign-extend their 32-bit results to 64 bits.",
+      "spec_section": "5.2"
+    },
+    {
+      "name": "ADDW/SUBW add/subtract word",
+      "hint_marker": 4,
+      "instructions": ["ADDW", "SUBW"],
+      "expected_behavior": {
+        "registers": {
+          "a3": "0x12345677 sign-extended",
+          "a6": "0xFFFFFFFE sign-extended"
+        }
+      },
+      "comment": "ADDW and SUBW are RV64I-only instructions that add/subtract the lower 32 bits and sign-extend the result to 64 bits.",
+      "spec_section": "5.2"
+    },
+    {
+      "name": "SLLW/SRLW/SRAW shift word",
+      "hint_marker": 5,
+      "instructions": ["SLLW", "SRLW", "SRAW"],
+      "expected_behavior": {
+        "registers": {
+          "s2": "0x10 sign-extended",
+          "s5": "0x0F000000 sign-extended",
+          "s7": "0xFF000000 sign-extended"
+        }
+      },
+      "comment": "SLLW, SRLW, and SRAW are RV64I-only instructions that perform 32-bit shifts and sign-extend the result.",
+      "spec_section": "5.2"
+    },
+    {
+      "name": "LD/LW/LWU load operations",
+      "hint_marker": 6,
+      "instructions": ["LD", "LW", "LWU"],
+      "expected_behavior": {
+        "registers": {
+          "s9": "full 64-bit value",
+          "s10": "lower 32 bits sign-extended",
+          "s11": "lower 32 bits zero-extended"
+        }
+      },
+      "comment": "LD loads a 64-bit value from memory into register rd. LW loads a 32-bit value and sign-extends to 64 bits. LWU loads a 32-bit value and zero-extends to 64 bits.",
+      "spec_section": "5.3"
+    },
+    {
+      "name": "SD store doubleword",
+      "hint_marker": 7,
+      "instructions": ["SD", "LD"],
+      "initial_state": {
+        "registers": {"t1": "0xFEDCBA9876543210"}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t2": "0xFEDCBA9876543210"
+        }
+      },
+      "comment": "SD stores a 64-bit value from register rs2 to memory.",
+      "spec_section": "5.3"
+    },
+    {
+      "name": "LW/LWU comparison",
+      "hint_marker": 8,
+      "instructions": ["LW", "LWU"],
+      "expected_behavior": {
+        "registers": {
+          "t4": "0xFFFFFFFFDEADBEEF (sign-extended)",
+          "t5": "0x00000000DEADBEEF (zero-extended)"
+        }
+      },
+      "comment": "LW sign-extends, LWU zero-extends 32-bit loads to 64 bits.",
+      "spec_section": "5.3"
+    },
+    {
+      "name": "Sign extension behavior",
+      "hint_marker": 9,
+      "instructions": ["ADDIW"],
+      "initial_state": {
+        "registers": {"a0": "0x0000000080000000"}
+      },
+      "expected_behavior": {
+        "registers": {
+          "a1": "0xFFFFFFFF80000000"
+        }
+      },
+      "comment": "ADDIW sign-extends the 32-bit result to 64 bits.",
+      "spec_section": "5.2",
+      "python_verification": "a0 = 0x80000000; a1 = 0xFFFFFFFF80000000  # Sign extended"
+    },
+    {
+      "name": "Zero extension via LWU",
+      "hint_marker": 10,
+      "instructions": ["LWU", "LW"],
+      "expected_behavior": {
+        "registers": {
+          "a3": "zero-extended value",
+          "a4": "sign-extended value"
+        }
+      },
+      "comment": "Comparing LWU (zero-extend) vs LW (sign-extend).",
+      "spec_section": "5.3"
+    },
+    {
+      "name": "64-bit arithmetic overflow",
+      "hint_marker": 11,
+      "instructions": ["ADDI"],
+      "initial_state": {
+        "registers": {"s0": "0x7FFFFFFFFFFFFFFF"}
+      },
+      "expected_behavior": {
+        "registers": {
+          "s1": "0x8000000000000000"
+        }
+      },
+      "comment": "64-bit arithmetic wraps on overflow.",
+      "spec_section": "5.2",
+      "edge_case": true
+    },
+    {
+      "name": "Large 64-bit arithmetic",
+      "hint_marker": 12,
+      "instructions": ["ADD", "SUB"],
+      "expected_behavior": {
+        "registers": {
+          "s4": "s2 + s3",
+          "s5": "s3 - s2"
+        }
+      },
+      "comment": "64-bit addition and subtraction.",
+      "spec_section": "5.2"
+    },
+    {
+      "name": "64-bit shifts",
+      "hint_marker": 13,
+      "instructions": ["SLL", "SRL"],
+      "expected_behavior": {
+        "registers": {
+          "t2": "0x100000000",
+          "t5": 1
+        }
+      },
+      "comment": "64-bit shift operations.",
+      "spec_section": "5.2",
+      "python_verification": "t2 = 1 << 32; t5 = 0x8000000000000000 >> 63"
+    }
+  ]
+}

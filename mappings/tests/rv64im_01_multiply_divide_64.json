@@ -1,0 +1,264 @@
+{
+  "$schema": "../../schemas/test-mapping.schema.json",
+  "test_file": "rv64im/01_multiply_divide_64.s",
+  "isa": "RV64IM",
+  "version": "1.0.0",
+  "spec_reference": "https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html",
+  "description": "Tests RV64IM 64-bit multiply and divide instructions. HINT instructions (addi x0, x0, N) mark test case N.",
+  "test_cases": [
+    {
+      "name": "MULW basic multiply word",
+      "hint_marker": 1,
+      "instructions": ["MULW"],
+      "expected_behavior": {
+        "registers": {
+          "a2": "0xFFFFFFFFFFFFFFFE"
+        }
+      },
+      "comment": "MULW is an RV64M-only instruction that multiplies the lower 32 bits of the source registers, placing the sign-extension of the lower 32 bits of the result into the destination register.",
+      "spec_section": "7.2",
+      "python_verification": "a0 = 0xFFFFFFFF; a1 = 2; a2 = ((a0 * a1) & 0xFFFFFFFF); a2 = a2 - 0x100000000 if a2 >= 0x80000000 else a2"
+    },
+    {
+      "name": "MULW with positive values",
+      "hint_marker": 2,
+      "instructions": ["MULW"],
+      "initial_state": {
+        "registers": {"t0": 100, "t1": 200}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t2": 20000
+        }
+      },
+      "comment": "MULW with positive 32-bit values.",
+      "spec_section": "7.2"
+    },
+    {
+      "name": "MULW with negative values",
+      "hint_marker": 3,
+      "instructions": ["MULW"],
+      "initial_state": {
+        "registers": {"t3": -10, "t4": 20}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t5": -200
+        }
+      },
+      "comment": "MULW with negative 32-bit values, result sign-extended.",
+      "spec_section": "7.2"
+    },
+    {
+      "name": "MUL 64-bit multiplication",
+      "hint_marker": 4,
+      "instructions": ["MUL"],
+      "initial_state": {
+        "registers": {"s0": "0x100000000", "s1": 2}
+      },
+      "expected_behavior": {
+        "registers": {
+          "s2": "0x200000000"
+        }
+      },
+      "comment": "64-bit multiplication with MUL.",
+      "spec_section": "7.1"
+    },
+    {
+      "name": "MULH 64-bit high bits",
+      "hint_marker": 5,
+      "instructions": ["MULH"],
+      "expected_behavior": {
+        "registers": {
+          "s5": "upper 64 bits of signed multiply"
+        }
+      },
+      "comment": "MULH returns upper 64 bits of signed multiplication.",
+      "spec_section": "7.1"
+    },
+    {
+      "name": "MULHU 64-bit unsigned high bits",
+      "hint_marker": 6,
+      "instructions": ["MULHU"],
+      "expected_behavior": {
+        "registers": {
+          "s8": "upper 64 bits of unsigned multiply"
+        }
+      },
+      "comment": "MULHU returns upper 64 bits of unsigned multiplication.",
+      "spec_section": "7.1"
+    },
+    {
+      "name": "MULHSU signed×unsigned",
+      "hint_marker": 7,
+      "instructions": ["MULHSU"],
+      "expected_behavior": {
+        "registers": {
+          "s11": "upper 64 bits of signed×unsigned"
+        }
+      },
+      "comment": "MULHSU performs signed×unsigned multiplication.",
+      "spec_section": "7.1"
+    },
+    {
+      "name": "DIVW/REMW basic division",
+      "hint_marker": 8,
+      "instructions": ["DIVW", "REMW"],
+      "initial_state": {
+        "registers": {"a3": 1000, "a4": 10}
+      },
+      "expected_behavior": {
+        "registers": {
+          "a5": 100,
+          "a6": 0
+        }
+      },
+      "comment": "DIVW and DIVUW perform 32-bit signed and unsigned division of the 32-bit value in rs1 by the 32-bit value in rs2, sign-extending the 32-bit result to 64 bits.",
+      "spec_section": "7.2"
+    },
+    {
+      "name": "DIVW negative dividend",
+      "hint_marker": 9,
+      "instructions": ["DIVW", "REMW"],
+      "expected_behavior": {
+        "registers": {
+          "t1": -100,
+          "t2": 0
+        }
+      },
+      "comment": "DIVW with negative dividend.",
+      "spec_section": "7.2"
+    },
+    {
+      "name": "DIVUW unsigned division",
+      "hint_marker": 10,
+      "instructions": ["DIVUW", "REMUW"],
+      "expected_behavior": {
+        "registers": {
+          "t5": "0x7FFFFFFF",
+          "t6": 1
+        }
+      },
+      "comment": "DIVUW performs unsigned 32-bit division.",
+      "spec_section": "7.2"
+    },
+    {
+      "name": "DIV/REM 64-bit division",
+      "hint_marker": 11,
+      "instructions": ["DIV", "REM"],
+      "expected_behavior": {
+        "registers": {
+          "s2": "0x80000000",
+          "s3": 0
+        }
+      },
+      "comment": "64-bit division with DIV and REM.",
+      "spec_section": "7.2"
+    },
+    {
+      "name": "DIVW division by zero",
+      "hint_marker": 12,
+      "instructions": ["DIVW", "DIVUW", "REMW", "REMUW"],
+      "expected_behavior": {
+        "registers": {
+          "s6": -1,
+          "s7": "0xFFFFFFFFFFFFFFFF",
+          "s8": 100,
+          "s9": 100
+        }
+      },
+      "comment": "Division by zero returns all bits set for quotient, dividend for remainder.",
+      "spec_section": "7.2",
+      "edge_case": true
+    },
+    {
+      "name": "DIV 64-bit division by zero",
+      "hint_marker": 13,
+      "instructions": ["DIV", "DIVU", "REM", "REMU"],
+      "expected_behavior": {
+        "registers": {
+          "a2": -1,
+          "a3": "0xFFFFFFFFFFFFFFFF",
+          "a4": "0x123456789ABCDEF0",
+          "a5": "0x123456789ABCDEF0"
+        }
+      },
+      "comment": "64-bit division by zero.",
+      "spec_section": "7.2",
+      "edge_case": true
+    },
+    {
+      "name": "DIVW overflow",
+      "hint_marker": 14,
+      "instructions": ["DIVW", "REMW"],
+      "initial_state": {
+        "registers": {"t0": "0x80000000", "t1": -1}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t2": "0x80000000 sign-extended",
+          "t3": 0
+        }
+      },
+      "comment": "MIN_INT32 / -1 overflow case.",
+      "spec_section": "7.2",
+      "edge_case": true
+    },
+    {
+      "name": "DIV 64-bit overflow",
+      "hint_marker": 15,
+      "instructions": ["DIV", "REM"],
+      "initial_state": {
+        "registers": {"s10": "0x8000000000000000", "s11": -1}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t4": "0x8000000000000000",
+          "t5": 0
+        }
+      },
+      "comment": "MIN_INT64 / -1 overflow case.",
+      "spec_section": "7.2",
+      "edge_case": true
+    },
+    {
+      "name": "Chained operations",
+      "hint_marker": 16,
+      "instructions": ["DIVW", "REMW"],
+      "expected_behavior": {
+        "registers": {
+          "t6": 100,
+          "s1": 33,
+          "s2": 1
+        }
+      },
+      "comment": "Chained division operations.",
+      "spec_section": "7.2"
+    },
+    {
+      "name": "Large 64-bit division",
+      "hint_marker": 17,
+      "instructions": ["DIV"],
+      "expected_behavior": {
+        "registers": {
+          "s5": "0x10000000"
+        }
+      },
+      "comment": "Division with large 64-bit values.",
+      "spec_section": "7.2"
+    },
+    {
+      "name": "Large unsigned operations",
+      "hint_marker": 18,
+      "instructions": ["DIVU", "REMU"],
+      "expected_behavior": {
+        "registers": {
+          "s8": "0xFFFFFFFFFFFFFFFF / 0x10",
+          "s9": "0xFFFFFFFFFFFFFFFF % 0x10"
+        }
+      },
+      "comment": "Unsigned operations with maximum values.",
+      "spec_section": "7.2"
+    }
+  ]
+}

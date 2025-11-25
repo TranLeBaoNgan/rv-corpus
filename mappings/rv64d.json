@@ -1,0 +1,115 @@
+{
+  "$schema": "../schemas/instruction-mapping.schema.json",
+  "isa": "RV64D",
+  "version": "1.0.0",
+  "spec_reference": "https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html",
+  "extends": "RV32D",
+  "instructions": {
+    "FCVT.L.D": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b1100001",
+        "funct3": "rm (rounding mode)",
+        "rd": "bits 11:7 (integer destination)",
+        "rs1": "bits 19:15 (floating-point source)",
+        "rs2": "00010",
+        "rm": "bits 14:12 (rounding mode)",
+        "full_encoding": "1100001 | 00010 | rs1[19:15] | rm[14:12] | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1",
+      "description": "Convert double-precision float to signed 64-bit integer",
+      "comment": "FCVT.L.D converts a double-precision floating-point number in floating-point register rs1 to a signed 64-bit integer in integer register rd. FCVT.L[U].D and FCVT.D.L[U] are RV64-only instructions.",
+      "spec_section": "14.10",
+      "operation": "x[rd] = s64(f[rs1])"
+    },
+    "FCVT.LU.D": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b1100001",
+        "funct3": "rm (rounding mode)",
+        "rd": "bits 11:7 (integer destination)",
+        "rs1": "bits 19:15 (floating-point source)",
+        "rs2": "00011",
+        "rm": "bits 14:12 (rounding mode)",
+        "full_encoding": "1100001 | 00011 | rs1[19:15] | rm[14:12] | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1",
+      "description": "Convert double-precision float to unsigned 64-bit integer",
+      "comment": "FCVT.LU.D converts a double-precision floating-point number to an unsigned 64-bit integer. FCVT.L[U].D and FCVT.D.L[U] are RV64-only instructions.",
+      "spec_section": "14.10",
+      "operation": "x[rd] = u64(f[rs1])"
+    },
+    "FCVT.D.L": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b1101001",
+        "funct3": "rm (rounding mode)",
+        "rd": "bits 11:7 (floating-point destination)",
+        "rs1": "bits 19:15 (integer source)",
+        "rs2": "00010",
+        "rm": "bits 14:12 (rounding mode)",
+        "full_encoding": "1101001 | 00010 | rs1[19:15] | rm[14:12] | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1",
+      "description": "Convert signed 64-bit integer to double-precision float",
+      "comment": "FCVT.D.L converts a 64-bit signed integer in integer register rs1 into a double-precision floating-point number in floating-point register rd. FCVT.L[U].D and FCVT.D.L[U] are RV64-only instructions.",
+      "spec_section": "14.10",
+      "operation": "f[rd] = f64(s64(x[rs1]))"
+    },
+    "FCVT.D.LU": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b1101001",
+        "funct3": "rm (rounding mode)",
+        "rd": "bits 11:7 (floating-point destination)",
+        "rs1": "bits 19:15 (integer source)",
+        "rs2": "00011",
+        "rm": "bits 14:12 (rounding mode)",
+        "full_encoding": "1101001 | 00011 | rs1[19:15] | rm[14:12] | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1",
+      "description": "Convert unsigned 64-bit integer to double-precision float",
+      "comment": "FCVT.D.LU converts a 64-bit unsigned integer to a double-precision floating-point number. FCVT.L[U].D and FCVT.D.L[U] are RV64-only instructions.",
+      "spec_section": "14.10",
+      "operation": "f[rd] = f64(u64(x[rs1]))"
+    },
+    "FMV.X.D": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b1110001",
+        "funct3": "0b000",
+        "rd": "bits 11:7 (integer destination)",
+        "rs1": "bits 19:15 (floating-point source)",
+        "rs2": "00000",
+        "full_encoding": "1110001 | 00000 | rs1[19:15] | 000 | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1",
+      "description": "Move double-precision float bits to 64-bit integer register",
+      "comment": "FMV.X.D moves the double-precision value in floating-point register rs1 to a representation in IEEE 754-2008 standard encoding in integer register rd. FMV.X.D and FMV.D.X do not modify the bits being transferred; in particular, the payloads of non-canonical NaNs are preserved.",
+      "spec_section": "14.11",
+      "operation": "x[rd] = f[rs1][63:0]"
+    },
+    "FMV.D.X": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b1111001",
+        "funct3": "0b000",
+        "rd": "bits 11:7 (floating-point destination)",
+        "rs1": "bits 19:15 (integer source)",
+        "rs2": "00000",
+        "full_encoding": "1111001 | 00000 | rs1[19:15] | 000 | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1",
+      "description": "Move 64-bit integer bits to double-precision float register",
+      "comment": "FMV.D.X moves the bit pattern in IEEE 754-2008 standard encoding from the integer register rs1 to the floating-point register rd. FMV.X.D and FMV.D.X do not modify the bits being transferred; in particular, the payloads of non-canonical NaNs are preserved.",
+      "spec_section": "14.11",
+      "operation": "f[rd] = x[rs1][63:0]"
+    }
+  }
+}

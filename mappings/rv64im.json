@@ -1,0 +1,108 @@
+{
+  "$schema": "../schemas/instruction-mapping.schema.json",
+  "isa": "RV64IM",
+  "version": "1.0.0",
+  "spec_reference": "https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html",
+  "extends": "RV64I",
+  "instructions": {
+    "MULW": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0111011",
+        "funct3": "0b000",
+        "funct7": "0b0000001",
+        "rd": "bits 11:7",
+        "rs1": "bits 19:15",
+        "rs2": "bits 24:20",
+        "full_encoding": "0000001 | rs2[24:20] | rs1[19:15] | 000 | rd[11:7] | 0111011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Multiply word - multiplies lower 32 bits and sign-extends result",
+      "comment": "MULW is an RV64M-only instruction that multiplies the lower 32 bits of the source registers, placing the sign-extension of the lower 32 bits of the result into the destination register.",
+      "spec_section": "7.2",
+      "operation": "x[rd] = sext((x[rs1][31:0] × x[rs2][31:0])[31:0])"
+    },
+    "DIVW": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0111011",
+        "funct3": "0b100",
+        "funct7": "0b0000001",
+        "rd": "bits 11:7",
+        "rs1": "bits 19:15",
+        "rs2": "bits 24:20",
+        "full_encoding": "0000001 | rs2[24:20] | rs1[19:15] | 100 | rd[11:7] | 0111011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Divide word signed - signed division of lower 32 bits, sign-extends result",
+      "comment": "DIVW and DIVUW perform 32-bit signed and unsigned division of the 32-bit value in rs1 by the 32-bit value in rs2, sign-extending the 32-bit result to 64 bits.",
+      "spec_section": "7.2",
+      "operation": "x[rd] = sext((x[rs1][31:0] /s x[rs2][31:0])[31:0])",
+      "notes": [
+        "Division by zero: result = -1 (all bits set, sign-extended)",
+        "Overflow (MIN_INT32 / -1): result = MIN_INT32 (sign-extended)"
+      ]
+    },
+    "DIVUW": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0111011",
+        "funct3": "0b101",
+        "funct7": "0b0000001",
+        "rd": "bits 11:7",
+        "rs1": "bits 19:15",
+        "rs2": "bits 24:20",
+        "full_encoding": "0000001 | rs2[24:20] | rs1[19:15] | 101 | rd[11:7] | 0111011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Divide word unsigned - unsigned division of lower 32 bits, sign-extends result",
+      "comment": "DIVW and DIVUW perform 32-bit signed and unsigned division of the 32-bit value in rs1 by the 32-bit value in rs2, sign-extending the 32-bit result to 64 bits.",
+      "spec_section": "7.2",
+      "operation": "x[rd] = sext((x[rs1][31:0] /u x[rs2][31:0])[31:0])",
+      "notes": [
+        "Division by zero: result = 0xFFFFFFFFFFFFFFFF (all bits set)"
+      ]
+    },
+    "REMW": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0111011",
+        "funct3": "0b110",
+        "funct7": "0b0000001",
+        "rd": "bits 11:7",
+        "rs1": "bits 19:15",
+        "rs2": "bits 24:20",
+        "full_encoding": "0000001 | rs2[24:20] | rs1[19:15] | 110 | rd[11:7] | 0111011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Remainder word signed - signed remainder of lower 32 bits, sign-extends result",
+      "comment": "REMW and REMUW provide the remainder of the corresponding 32-bit division operation, sign-extending the result to 64 bits.",
+      "spec_section": "7.2",
+      "operation": "x[rd] = sext((x[rs1][31:0] %s x[rs2][31:0])[31:0])",
+      "notes": [
+        "Division by zero: remainder = dividend (sign-extended)",
+        "Overflow (MIN_INT32 / -1): remainder = 0"
+      ]
+    },
+    "REMUW": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0111011",
+        "funct3": "0b111",
+        "funct7": "0b0000001",
+        "rd": "bits 11:7",
+        "rs1": "bits 19:15",
+        "rs2": "bits 24:20",
+        "full_encoding": "0000001 | rs2[24:20] | rs1[19:15] | 111 | rd[11:7] | 0111011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Remainder word unsigned - unsigned remainder of lower 32 bits, sign-extends result",
+      "comment": "REMW and REMUW provide the remainder of the corresponding 32-bit division operation, sign-extending the result to 64 bits.",
+      "spec_section": "7.2",
+      "operation": "x[rd] = sext((x[rs1][31:0] %u x[rs2][31:0])[31:0])",
+      "notes": [
+        "Division by zero: remainder = dividend (sign-extended)"
+      ]
+    }
+  }
+}

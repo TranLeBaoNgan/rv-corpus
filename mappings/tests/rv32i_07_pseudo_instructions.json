@@ -1,0 +1,356 @@
+{
+  "$schema": "../../schemas/test-mapping.schema.json",
+  "test_file": "rv32i/07_pseudo_instructions.s",
+  "isa": "RV32I",
+  "version": "1.0.0",
+  "spec_reference": "https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html",
+  "description": "Tests RISC-V pseudo-instructions that expand to base RV32I instructions. HINT instructions (addi x0, x0, N) mark test case N.",
+  "test_cases": [
+    {
+      "name": "NOP pseudo-instruction",
+      "hint_marker": 1,
+      "instructions": ["NOP"],
+      "expected_behavior": {},
+      "comment": "NOP expands to: addi x0, x0, 0. The NOP instruction does not change any user-visible state, except for advancing the pc.",
+      "spec_section": "2.4.3"
+    },
+    {
+      "name": "LI pseudo-instruction",
+      "hint_marker": 2,
+      "instructions": ["LI"],
+      "expected_behavior": {
+        "registers": {
+          "a0": 42,
+          "a1": "0x12345",
+          "a2": -1,
+          "a3": 0
+        }
+      },
+      "comment": "LI (load immediate) can expand to LUI+ADDI for large values or just ADDI for small values. The assembler chooses the optimal encoding.",
+      "spec_section": "2.4.1",
+      "python_verification": "a0=42; a1=0x12345; a2=-1; a3=0",
+      "notes": [
+        "Small values use ADDI only",
+        "Large values use LUI + ADDI",
+        "Negative values are sign-extended"
+      ]
+    },
+    {
+      "name": "MV pseudo-instruction",
+      "hint_marker": 3,
+      "instructions": ["MV"],
+      "initial_state": {
+        "registers": {"a0": 42, "a1": "0x12345"}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t0": 42,
+          "t1": "0x12345"
+        }
+      },
+      "comment": "MV (move) expands to: addi rd, rs, 0. ADDI rd, rs1, 0 is used to implement the MV rd, rs1 assembler pseudoinstruction.",
+      "spec_section": "2.4.1"
+    },
+    {
+      "name": "NOT pseudo-instruction",
+      "hint_marker": 4,
+      "instructions": ["NOT"],
+      "initial_state": {
+        "registers": {"s0": "0x0F0F0F0F"}
+      },
+      "expected_behavior": {
+        "registers": {
+          "s1": "0xF0F0F0F0"
+        }
+      },
+      "comment": "NOT expands to: xori rd, rs, -1. XORI rd, rs1, -1 performs a bitwise logical inversion of register rs1 (assembler pseudoinstruction NOT rd, rs1).",
+      "spec_section": "2.4.1",
+      "python_verification": "s0 = 0x0F0F0F0F; s1 = ~s0 & 0xFFFFFFFF  # s1 = 0xF0F0F0F0"
+    },
+    {
+      "name": "NEG pseudo-instruction",
+      "hint_marker": 5,
+      "instructions": ["NEG"],
+      "initial_state": {
+        "registers": {"s2": 42}
+      },
+      "expected_behavior": {
+        "registers": {
+          "s3": -42
+        }
+      },
+      "comment": "NEG expands to: sub rd, x0, rs. Computes the two's complement negation.",
+      "spec_section": "2.4.2",
+      "python_verification": "s2 = 42; s3 = -s2  # s3 = -42"
+    },
+    {
+      "name": "SEQZ pseudo-instruction",
+      "hint_marker": 6,
+      "instructions": ["SEQZ"],
+      "expected_behavior": {
+        "registers": {
+          "t1": 1,
+          "t3": 0
+        }
+      },
+      "comment": "SEQZ expands to: sltiu rd, rs, 1. SLTIU rd, rs1, 1 sets rd to 1 if rs1 equals zero, otherwise sets rd to 0 (assembler pseudoinstruction SEQZ rd, rs1).",
+      "spec_section": "2.4.1",
+      "python_verification": "t0=0; t1=1 if t0==0 else 0; t2=5; t3=1 if t2==0 else 0  # t1=1, t3=0"
+    },
+    {
+      "name": "SNEZ pseudo-instruction",
+      "hint_marker": 7,
+      "instructions": ["SNEZ"],
+      "expected_behavior": {
+        "registers": {
+          "t5": 0,
+          "a4": 1
+        }
+      },
+      "comment": "SNEZ expands to: sltu rd, x0, rs. Sets rd to 1 if rs is not zero, otherwise 0.",
+      "spec_section": "2.4.2",
+      "python_verification": "t4=0; t5=1 if t4!=0 else 0; t6=5; a4=1 if t6!=0 else 0  # t5=0, a4=1"
+    },
+    {
+      "name": "SLTZ and SGTZ pseudo-instructions",
+      "hint_marker": 8,
+      "instructions": ["SLTZ", "SGTZ"],
+      "expected_behavior": {
+        "registers": {
+          "s5": 1,
+          "s7": 0,
+          "s9": 1,
+          "s11": 0
+        }
+      },
+      "comment": "SLTZ expands to: slt rd, rs, x0. SGTZ expands to: slt rd, x0, rs. These test if a value is negative or positive.",
+      "spec_section": "2.4.2",
+      "python_verification": "s4=-5; s5=1 if s4<0 else 0; s6=5; s7=1 if s6<0 else 0; s8=5; s9=1 if s8>0 else 0; s10=-5; s11=1 if s10>0 else 0"
+    },
+    {
+      "name": "BEQZ pseudo-instruction",
+      "hint_marker": 9,
+      "instructions": ["BEQZ"],
+      "initial_state": {
+        "registers": {"a5": 0}
+      },
+      "expected_behavior": {
+        "registers": {
+          "a6": 2
+        },
+        "pc_change": "branch taken"
+      },
+      "comment": "BEQZ expands to: beq rs, x0, offset. Branch if register equals zero.",
+      "spec_section": "2.5.2"
+    },
+    {
+      "name": "BNEZ pseudo-instruction",
+      "hint_marker": 10,
+      "instructions": ["BNEZ"],
+      "initial_state": {
+        "registers": {"a7": 5}
+      },
+      "expected_behavior": {
+        "registers": {
+          "s0": 2
+        },
+        "pc_change": "branch taken"
+      },
+      "comment": "BNEZ expands to: bne rs, x0, offset. Branch if register not equal to zero.",
+      "spec_section": "2.5.2"
+    },
+    {
+      "name": "BLEZ pseudo-instruction",
+      "hint_marker": 11,
+      "instructions": ["BLEZ"],
+      "initial_state": {
+        "registers": {"s1": -5}
+      },
+      "expected_behavior": {
+        "registers": {
+          "s2": 2
+        },
+        "pc_change": "branch taken"
+      },
+      "comment": "BLEZ expands to: bge x0, rs, offset. Branch if register is less than or equal to zero (signed).",
+      "spec_section": "2.5.2"
+    },
+    {
+      "name": "BGEZ pseudo-instruction",
+      "hint_marker": 12,
+      "instructions": ["BGEZ"],
+      "initial_state": {
+        "registers": {"s3": 5}
+      },
+      "expected_behavior": {
+        "registers": {
+          "s4": 2
+        },
+        "pc_change": "branch taken"
+      },
+      "comment": "BGEZ expands to: bge rs, x0, offset. Branch if register is greater than or equal to zero (signed).",
+      "spec_section": "2.5.2"
+    },
+    {
+      "name": "BLTZ pseudo-instruction",
+      "hint_marker": 13,
+      "instructions": ["BLTZ"],
+      "initial_state": {
+        "registers": {"s5": -5}
+      },
+      "expected_behavior": {
+        "registers": {
+          "s6": 2
+        },
+        "pc_change": "branch taken"
+      },
+      "comment": "BLTZ expands to: blt rs, x0, offset. Branch if register is less than zero (signed).",
+      "spec_section": "2.5.2"
+    },
+    {
+      "name": "BGTZ pseudo-instruction",
+      "hint_marker": 14,
+      "instructions": ["BGTZ"],
+      "initial_state": {
+        "registers": {"s7": 5}
+      },
+      "expected_behavior": {
+        "registers": {
+          "s8": 2
+        },
+        "pc_change": "branch taken"
+      },
+      "comment": "BGTZ expands to: blt x0, rs, offset. Branch if register is greater than zero (signed).",
+      "spec_section": "2.5.2"
+    },
+    {
+      "name": "BGT pseudo-instruction",
+      "hint_marker": 15,
+      "instructions": ["BGT"],
+      "initial_state": {
+        "registers": {"t0": 10, "t1": 5}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t2": 2
+        },
+        "pc_change": "branch taken"
+      },
+      "comment": "BGT expands to: blt rs2, rs1, offset. Branch if rs1 > rs2 (signed).",
+      "spec_section": "2.5.2"
+    },
+    {
+      "name": "BLE pseudo-instruction",
+      "hint_marker": 16,
+      "instructions": ["BLE"],
+      "initial_state": {
+        "registers": {"t3": 5, "t4": 10}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t5": 2
+        },
+        "pc_change": "branch taken"
+      },
+      "comment": "BLE expands to: bge rs2, rs1, offset. Branch if rs1 <= rs2 (signed).",
+      "spec_section": "2.5.2"
+    },
+    {
+      "name": "BGTU pseudo-instruction",
+      "hint_marker": 17,
+      "instructions": ["BGTU"],
+      "initial_state": {
+        "registers": {"t6": "0xFFFFFFFF", "a0": 100}
+      },
+      "expected_behavior": {
+        "registers": {
+          "a1": 2
+        },
+        "pc_change": "branch taken"
+      },
+      "comment": "BGTU expands to: bltu rs2, rs1, offset. Branch if rs1 > rs2 (unsigned).",
+      "spec_section": "2.5.2"
+    },
+    {
+      "name": "BLEU pseudo-instruction",
+      "hint_marker": 18,
+      "instructions": ["BLEU"],
+      "initial_state": {
+        "registers": {"a2": 5, "a3": 10}
+      },
+      "expected_behavior": {
+        "registers": {
+          "a4": 2
+        },
+        "pc_change": "branch taken"
+      },
+      "comment": "BLEU expands to: bgeu rs2, rs1, offset. Branch if rs1 <= rs2 (unsigned).",
+      "spec_section": "2.5.2"
+    },
+    {
+      "name": "J pseudo-instruction",
+      "hint_marker": 19,
+      "instructions": ["J"],
+      "expected_behavior": {
+        "registers": {
+          "a5": 2
+        },
+        "pc_change": "unconditional jump"
+      },
+      "comment": "J expands to: jal x0, offset. Unconditional jump, discarding return address.",
+      "spec_section": "2.5.1"
+    },
+    {
+      "name": "JR pseudo-instruction",
+      "hint_marker": 20,
+      "instructions": ["JR"],
+      "expected_behavior": {
+        "registers": {
+          "a6": 2
+        },
+        "pc_change": "indirect jump"
+      },
+      "comment": "JR expands to: jalr x0, 0(rs). Jump to address in register, discarding return address.",
+      "spec_section": "2.5.1"
+    },
+    {
+      "name": "RET pseudo-instruction",
+      "hint_marker": 21,
+      "instructions": ["RET"],
+      "expected_behavior": {
+        "registers": {
+          "a7": 3
+        },
+        "pc_change": "return from subroutine"
+      },
+      "comment": "RET expands to: jalr x0, 0(x1). Return from subroutine using ra (x1).",
+      "spec_section": "2.5.1"
+    },
+    {
+      "name": "CALL pseudo-instruction",
+      "hint_marker": 22,
+      "instructions": ["CALL"],
+      "expected_behavior": {
+        "registers": {
+          "s9": 4
+        },
+        "pc_change": "call subroutine"
+      },
+      "comment": "CALL can expand to: auipc x1, offset[31:12]; jalr x1, x1, offset[11:0] or just jal x1, offset for near calls.",
+      "spec_section": "2.5.1"
+    },
+    {
+      "name": "LA pseudo-instruction",
+      "hint_marker": 23,
+      "instructions": ["LA"],
+      "expected_behavior": {
+        "registers": {
+          "s10": "address of test_data",
+          "s11": "0x12345678"
+        }
+      },
+      "comment": "LA (load address) expands to: auipc rd, offset[31:12]; addi rd, rd, offset[11:0]. Loads the address of a symbol.",
+      "spec_section": "2.4.1"
+    }
+  ]
+}

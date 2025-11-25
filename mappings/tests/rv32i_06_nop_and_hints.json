@@ -1,0 +1,166 @@
+{
+  "$schema": "../../schemas/test-mapping.schema.json",
+  "test_file": "rv32i/06_nop_and_hints.s",
+  "isa": "RV32I",
+  "version": "1.0.0",
+  "spec_reference": "https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html",
+  "description": "Tests NOP and HINT instructions behavior. HINT instructions with markers 100+ to avoid confusion with HINT behavior being tested. HINT instructions (addi x0, x0, N) mark test case N.",
+  "test_cases": [
+    {
+      "name": "NOP instruction",
+      "hint_marker": 100,
+      "instructions": ["NOP"],
+      "expected_behavior": {
+        "registers": {},
+        "pc_change": "sequential (pc+4 three times)"
+      },
+      "comment": "The NOP instruction does not change any user-visible state, except for advancing the pc and incrementing any applicable performance counters. NOP is encoded as ADDI x0, x0, 0.",
+      "spec_section": "2.4.3",
+      "notes": ["NOP is encoded as ADDI x0, x0, 0"]
+    },
+    {
+      "name": "NOP doesn't affect registers",
+      "hint_marker": 101,
+      "instructions": ["NOP", "LI", "MV"],
+      "initial_state": {
+        "registers": {"a0": 42}
+      },
+      "expected_behavior": {
+        "registers": {
+          "a1": 42
+        }
+      },
+      "comment": "The NOP instruction does not change any user-visible state, except for advancing the pc.",
+      "spec_section": "2.4.3"
+    },
+    {
+      "name": "Multiple NOPs in sequence",
+      "hint_marker": 102,
+      "instructions": ["NOP", "ADD"],
+      "expected_behavior": {
+        "registers": {
+          "t0": 1,
+          "t1": 2,
+          "t2": 3
+        }
+      },
+      "comment": "Multiple NOPs should have no effect on computation.",
+      "spec_section": "2.4.3"
+    },
+    {
+      "name": "HINT with non-zero immediate",
+      "hint_marker": 103,
+      "instructions": ["ADDI x0", "ORI x0"],
+      "expected_behavior": {
+        "registers": {}
+      },
+      "comment": "HINT instructions are usually used to communicate performance hints to the microarchitecture. HINTs are encoded as integer computational instructions with rd=x0.",
+      "spec_section": "2.9",
+      "notes": [
+        "addi x0, x0, 1 is a HINT instruction",
+        "addi x0, rs1, 0 is a HINT when rs1 != x0",
+        "ori x0, rs1, 0 is a HINT"
+      ]
+    },
+    {
+      "name": "HINTs don't affect computation",
+      "hint_marker": 104,
+      "instructions": ["LI", "ADDI x0", "MV"],
+      "expected_behavior": {
+        "registers": {
+          "s0": 100,
+          "s1": 100
+        }
+      },
+      "comment": "HINT instructions are usually used to communicate performance hints to the microarchitecture. The instructions typically perform a NOP-like operation if not supported by the implementation.",
+      "spec_section": "2.9"
+    },
+    {
+      "name": "Zero register behavior",
+      "hint_marker": 105,
+      "instructions": ["LI", "ADDI x0", "MV"],
+      "initial_state": {
+        "registers": {"a0": 999}
+      },
+      "expected_behavior": {
+        "registers": {
+          "a1": 0
+        }
+      },
+      "comment": "Register x0 is hardwired with all bits equal to 0. Writes to x0 are ignored, and reads from x0 always return 0.",
+      "spec_section": "2.1"
+    },
+    {
+      "name": "Zero register writes ignored",
+      "hint_marker": 106,
+      "instructions": ["ADD x0", "OR x0", "SUB x0"],
+      "expected_behavior": {
+        "registers": {}
+      },
+      "comment": "Register x0 is hardwired with all bits equal to 0. Writes to x0 are ignored.",
+      "spec_section": "2.1",
+      "notes": ["All these instructions are HINTs since rd=x0"]
+    },
+    {
+      "name": "Reading from x0",
+      "hint_marker": 107,
+      "instructions": ["ADD", "SUB", "OR", "AND"],
+      "initial_state": {
+        "registers": {"a0": 999}
+      },
+      "expected_behavior": {
+        "registers": {
+          "a2": 999,
+          "a3": 999,
+          "a4": 999,
+          "a5": 0
+        }
+      },
+      "comment": "Register x0 is hardwired with all bits equal to 0. Reads from x0 always return 0.",
+      "spec_section": "2.1",
+      "python_verification": "a0 = 999; a2 = 0 + a0; a3 = a0 - 0; a4 = 0 | a0; a5 = 0 & a0  # a2=a3=a4=999, a5=0"
+    },
+    {
+      "name": "NOP equivalents",
+      "hint_marker": 108,
+      "instructions": ["ADDI"],
+      "expected_behavior": {
+        "registers": {}
+      },
+      "comment": "ADDI x0, x0, 0 is the canonical NOP encoding. ADDI x1, x1, 0 is effectively a no-op copy of x1 to itself.",
+      "spec_section": "2.4.3"
+    },
+    {
+      "name": "NOPs with branches",
+      "hint_marker": 109,
+      "instructions": ["BEQ", "NOP"],
+      "initial_state": {
+        "registers": {"t0": 5, "t1": 10}
+      },
+      "expected_behavior": {
+        "pc_change": "branch not taken, execute NOPs"
+      },
+      "comment": "NOPs should execute normally when branch is not taken.",
+      "spec_section": "2.4.3"
+    },
+    {
+      "name": "Alignment with NOPs",
+      "hint_marker": 110,
+      "instructions": ["LI", "NOP", "ADD"],
+      "expected_behavior": {
+        "registers": {
+          "s2": 1,
+          "s3": 2,
+          "s4": 3,
+          "s5": 4,
+          "s6": 3,
+          "s7": 7,
+          "s8": 10
+        }
+      },
+      "comment": "NOPs can be used for code alignment and timing without affecting computation.",
+      "spec_section": "2.4.3",
+      "python_verification": "s2=1; s3=2; s4=3; s5=4; s6=s2+s3; s7=s4+s5; s8=s6+s7  # s6=3, s7=7, s8=10"
+    }
+  ]
+}

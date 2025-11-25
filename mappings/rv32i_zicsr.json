@@ -1,0 +1,109 @@
+{
+  "$schema": "../schemas/instruction-mapping.schema.json",
+  "isa": "RV32I_Zicsr",
+  "version": "1.0.0",
+  "spec_reference": "https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html",
+  "extends": "RV32I",
+  "instructions": {
+    "CSRRW": {
+      "format": "CSR",
+      "encoding": {
+        "opcode": "0b1110011",
+        "funct3": "0b001",
+        "rd": "bits 11:7 (destination register)",
+        "rs1": "bits 19:15 (source register)",
+        "csr": "bits 31:20 (CSR address)",
+        "full_encoding": "csr[31:20] | rs1[19:15] | 001 | rd[11:7] | 1110011"
+      },
+      "assembly_syntax": "rd, csr, rs1",
+      "description": "Atomic Read/Write CSR",
+      "comment": "The CSRRW (Atomic Read/Write CSR) instruction atomically swaps values in the CSRs and integer registers. CSRRW reads the old value of the CSR, zero-extends the value to XLEN bits, then writes it to integer register rd. The initial value in rs1 is written to the CSR.",
+      "spec_section": "9.1",
+      "operation": "t = CSRs[csr]; CSRs[csr] = x[rs1]; x[rd] = t"
+    },
+    "CSRRS": {
+      "format": "CSR",
+      "encoding": {
+        "opcode": "0b1110011",
+        "funct3": "0b010",
+        "rd": "bits 11:7 (destination register)",
+        "rs1": "bits 19:15 (source register/bit mask)",
+        "csr": "bits 31:20 (CSR address)",
+        "full_encoding": "csr[31:20] | rs1[19:15] | 010 | rd[11:7] | 1110011"
+      },
+      "assembly_syntax": "rd, csr, rs1",
+      "description": "Atomic Read and Set Bits in CSR",
+      "comment": "The CSRRS (Atomic Read and Set Bits in CSR) instruction reads the value of the CSR, zero-extends the value to XLEN bits, and writes it to integer register rd. The initial value in integer register rs1 is treated as a bit mask that specifies bit positions to be set in the CSR.",
+      "spec_section": "9.1",
+      "operation": "t = CSRs[csr]; CSRs[csr] = t | x[rs1]; x[rd] = t",
+      "notes": ["If rs1=x0, the instruction will not write to the CSR at all"]
+    },
+    "CSRRC": {
+      "format": "CSR",
+      "encoding": {
+        "opcode": "0b1110011",
+        "funct3": "0b011",
+        "rd": "bits 11:7 (destination register)",
+        "rs1": "bits 19:15 (source register/bit mask)",
+        "csr": "bits 31:20 (CSR address)",
+        "full_encoding": "csr[31:20] | rs1[19:15] | 011 | rd[11:7] | 1110011"
+      },
+      "assembly_syntax": "rd, csr, rs1",
+      "description": "Atomic Read and Clear Bits in CSR",
+      "comment": "The CSRRC (Atomic Read and Clear Bits in CSR) instruction reads the value of the CSR, zero-extends the value to XLEN bits, and writes it to integer register rd. The initial value in integer register rs1 is treated as a bit mask that specifies bit positions to be cleared in the CSR.",
+      "spec_section": "9.1",
+      "operation": "t = CSRs[csr]; CSRs[csr] = t & ~x[rs1]; x[rd] = t",
+      "notes": ["If rs1=x0, the instruction will not write to the CSR at all"]
+    },
+    "CSRRWI": {
+      "format": "CSR",
+      "encoding": {
+        "opcode": "0b1110011",
+        "funct3": "0b101",
+        "rd": "bits 11:7 (destination register)",
+        "imm": "bits 19:15 (5-bit zero-extended immediate)",
+        "csr": "bits 31:20 (CSR address)",
+        "full_encoding": "csr[31:20] | uimm[19:15] | 101 | rd[11:7] | 1110011"
+      },
+      "assembly_syntax": "rd, csr, uimm",
+      "description": "Atomic Read/Write CSR Immediate",
+      "comment": "The immediate forms use a 5-bit zero-extended immediate encoded in the rs1 field.",
+      "spec_section": "9.1",
+      "operation": "t = CSRs[csr]; CSRs[csr] = zext(uimm); x[rd] = t"
+    },
+    "CSRRSI": {
+      "format": "CSR",
+      "encoding": {
+        "opcode": "0b1110011",
+        "funct3": "0b110",
+        "rd": "bits 11:7 (destination register)",
+        "imm": "bits 19:15 (5-bit zero-extended immediate)",
+        "csr": "bits 31:20 (CSR address)",
+        "full_encoding": "csr[31:20] | uimm[19:15] | 110 | rd[11:7] | 1110011"
+      },
+      "assembly_syntax": "rd, csr, uimm",
+      "description": "Atomic Read and Set Bits in CSR Immediate",
+      "comment": "CSRRSI sets CSR bits specified by the immediate value.",
+      "spec_section": "9.1",
+      "operation": "t = CSRs[csr]; CSRs[csr] = t | zext(uimm); x[rd] = t",
+      "notes": ["If uimm=0, the instruction will not write to the CSR at all"]
+    },
+    "CSRRCI": {
+      "format": "CSR",
+      "encoding": {
+        "opcode": "0b1110011",
+        "funct3": "0b111",
+        "rd": "bits 11:7 (destination register)",
+        "imm": "bits 19:15 (5-bit zero-extended immediate)",
+        "csr": "bits 31:20 (CSR address)",
+        "full_encoding": "csr[31:20] | uimm[19:15] | 111 | rd[11:7] | 1110011"
+      },
+      "assembly_syntax": "rd, csr, uimm",
+      "description": "Atomic Read and Clear Bits in CSR Immediate",
+      "comment": "CSRRCI clears CSR bits specified by the immediate value.",
+      "spec_section": "9.1",
+      "operation": "t = CSRs[csr]; CSRs[csr] = t & ~zext(uimm); x[rd] = t",
+      "notes": ["If uimm=0, the instruction will not write to the CSR at all"]
+    }
+  }
+}

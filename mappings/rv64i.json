@@ -1,0 +1,209 @@
+{
+  "$schema": "../schemas/instruction-mapping.schema.json",
+  "isa": "RV64I",
+  "version": "1.0.0",
+  "spec_reference": "https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html",
+  "extends": "RV32I",
+  "instructions": {
+    "LWU": {
+      "format": "I-type",
+      "encoding": {
+        "opcode": "0b0000011",
+        "funct3": "0b110",
+        "rd": "bits 11:7",
+        "rs1": "bits 19:15",
+        "imm": "bits 31:20 (12-bit signed offset)",
+        "full_encoding": "imm[31:20] | rs1[19:15] | 110 | rd[11:7] | 0000011"
+      },
+      "assembly_syntax": "rd, offset(rs1)",
+      "description": "Load word unsigned - zero-extends 32-bit value to 64 bits",
+      "comment": "LWU loads a 32-bit value and zero-extends to 64 bits.",
+      "spec_section": "5.3",
+      "operation": "x[rd] = zext(M[x[rs1] + sext(offset)][31:0])"
+    },
+    "LD": {
+      "format": "I-type",
+      "encoding": {
+        "opcode": "0b0000011",
+        "funct3": "0b011",
+        "rd": "bits 11:7",
+        "rs1": "bits 19:15",
+        "imm": "bits 31:20 (12-bit signed offset)",
+        "full_encoding": "imm[31:20] | rs1[19:15] | 011 | rd[11:7] | 0000011"
+      },
+      "assembly_syntax": "rd, offset(rs1)",
+      "description": "Load doubleword - loads 64-bit value from memory",
+      "comment": "LD loads a 64-bit value from memory into register rd.",
+      "spec_section": "5.3",
+      "operation": "x[rd] = M[x[rs1] + sext(offset)][63:0]"
+    },
+    "SD": {
+      "format": "S-type",
+      "encoding": {
+        "opcode": "0b0100011",
+        "funct3": "0b011",
+        "rs1": "bits 19:15 (base address)",
+        "rs2": "bits 24:20 (source register)",
+        "imm": "bits 31:25 and 11:7 (12-bit signed offset)",
+        "full_encoding": "imm[11:5] | rs2[24:20] | rs1[19:15] | 011 | imm[4:0] | 0100011"
+      },
+      "assembly_syntax": "rs2, offset(rs1)",
+      "description": "Store doubleword - stores 64-bit value to memory",
+      "comment": "SD stores a 64-bit value from register rs2 to memory.",
+      "spec_section": "5.3",
+      "operation": "M[x[rs1] + sext(offset)] = x[rs2][63:0]"
+    },
+    "ADDIW": {
+      "format": "I-type",
+      "encoding": {
+        "opcode": "0b0011011",
+        "funct3": "0b000",
+        "rd": "bits 11:7",
+        "rs1": "bits 19:15",
+        "imm": "bits 31:20 (12-bit signed immediate)",
+        "full_encoding": "imm[31:20] | rs1[19:15] | 000 | rd[11:7] | 0011011"
+      },
+      "assembly_syntax": "rd, rs1, imm",
+      "description": "Add immediate word - adds sign-extended 12-bit immediate to lower 32 bits and sign-extends result",
+      "comment": "ADDIW is an RV64I-only instruction that adds the sign-extended 12-bit immediate to register rs1 and produces the proper sign extension of a 32-bit result in rd.",
+      "spec_section": "5.2",
+      "operation": "x[rd] = sext((x[rs1] + sext(imm))[31:0])"
+    },
+    "SLLIW": {
+      "format": "I-type",
+      "encoding": {
+        "opcode": "0b0011011",
+        "funct3": "0b001",
+        "funct7": "0b0000000",
+        "rd": "bits 11:7",
+        "rs1": "bits 19:15",
+        "imm": "bits 24:20 (5-bit shift amount)",
+        "full_encoding": "0000000 | shamt[24:20] | rs1[19:15] | 001 | rd[11:7] | 0011011"
+      },
+      "assembly_syntax": "rd, rs1, shamt",
+      "description": "Shift left logical immediate word - shifts lower 32 bits left, sign-extends result",
+      "comment": "SLLIW, SRLIW, and SRAIW are RV64I-only instructions that are analogous to SLLI, SRLI, and SRAI, but operate on 32-bit values and sign-extend their 32-bit results to 64 bits.",
+      "spec_section": "5.2",
+      "operation": "x[rd] = sext((x[rs1] << shamt)[31:0])"
+    },
+    "SRLIW": {
+      "format": "I-type",
+      "encoding": {
+        "opcode": "0b0011011",
+        "funct3": "0b101",
+        "funct7": "0b0000000",
+        "rd": "bits 11:7",
+        "rs1": "bits 19:15",
+        "imm": "bits 24:20 (5-bit shift amount)",
+        "full_encoding": "0000000 | shamt[24:20] | rs1[19:15] | 101 | rd[11:7] | 0011011"
+      },
+      "assembly_syntax": "rd, rs1, shamt",
+      "description": "Shift right logical immediate word - logical shifts lower 32 bits right, sign-extends result",
+      "comment": "SLLIW, SRLIW, and SRAIW are RV64I-only instructions that are analogous to SLLI, SRLI, and SRAI, but operate on 32-bit values and sign-extend their 32-bit results to 64 bits.",
+      "spec_section": "5.2",
+      "operation": "x[rd] = sext((x[rs1][31:0] >> shamt))"
+    },
+    "SRAIW": {
+      "format": "I-type",
+      "encoding": {
+        "opcode": "0b0011011",
+        "funct3": "0b101",
+        "funct7": "0b0100000",
+        "rd": "bits 11:7",
+        "rs1": "bits 19:15",
+        "imm": "bits 24:20 (5-bit shift amount)",
+        "full_encoding": "0100000 | shamt[24:20] | rs1[19:15] | 101 | rd[11:7] | 0011011"
+      },
+      "assembly_syntax": "rd, rs1, shamt",
+      "description": "Shift right arithmetic immediate word - arithmetic shifts lower 32 bits right, sign-extends result",
+      "comment": "SLLIW, SRLIW, and SRAIW are RV64I-only instructions that are analogous to SLLI, SRLI, and SRAI, but operate on 32-bit values and sign-extend their 32-bit results to 64 bits.",
+      "spec_section": "5.2",
+      "operation": "x[rd] = sext(sra(x[rs1][31:0], shamt))"
+    },
+    "ADDW": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0111011",
+        "funct3": "0b000",
+        "funct7": "0b0000000",
+        "rd": "bits 11:7",
+        "rs1": "bits 19:15",
+        "rs2": "bits 24:20",
+        "full_encoding": "0000000 | rs2[24:20] | rs1[19:15] | 000 | rd[11:7] | 0111011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Add word - adds lower 32 bits and sign-extends result",
+      "comment": "ADDW and SUBW are RV64I-only instructions that add/subtract the lower 32 bits and sign-extend the result to 64 bits.",
+      "spec_section": "5.2",
+      "operation": "x[rd] = sext((x[rs1] + x[rs2])[31:0])"
+    },
+    "SUBW": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0111011",
+        "funct3": "0b000",
+        "funct7": "0b0100000",
+        "rd": "bits 11:7",
+        "rs1": "bits 19:15",
+        "rs2": "bits 24:20",
+        "full_encoding": "0100000 | rs2[24:20] | rs1[19:15] | 000 | rd[11:7] | 0111011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Subtract word - subtracts lower 32 bits and sign-extends result",
+      "comment": "ADDW and SUBW are RV64I-only instructions that add/subtract the lower 32 bits and sign-extend the result to 64 bits.",
+      "spec_section": "5.2",
+      "operation": "x[rd] = sext((x[rs1] - x[rs2])[31:0])"
+    },
+    "SLLW": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0111011",
+        "funct3": "0b001",
+        "funct7": "0b0000000",
+        "rd": "bits 11:7",
+        "rs1": "bits 19:15",
+        "rs2": "bits 24:20",
+        "full_encoding": "0000000 | rs2[24:20] | rs1[19:15] | 001 | rd[11:7] | 0111011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Shift left logical word - shifts lower 32 bits left by rs2[4:0], sign-extends result",
+      "comment": "SLLW, SRLW, and SRAW are RV64I-only instructions that perform 32-bit shifts and sign-extend the result.",
+      "spec_section": "5.2",
+      "operation": "x[rd] = sext((x[rs1] << x[rs2][4:0])[31:0])"
+    },
+    "SRLW": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0111011",
+        "funct3": "0b101",
+        "funct7": "0b0000000",
+        "rd": "bits 11:7",
+        "rs1": "bits 19:15",
+        "rs2": "bits 24:20",
+        "full_encoding": "0000000 | rs2[24:20] | rs1[19:15] | 101 | rd[11:7] | 0111011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Shift right logical word - logical shifts lower 32 bits right, sign-extends result",
+      "comment": "SLLW, SRLW, and SRAW are RV64I-only instructions that perform 32-bit shifts and sign-extend the result.",
+      "spec_section": "5.2",
+      "operation": "x[rd] = sext((x[rs1][31:0] >> x[rs2][4:0]))"
+    },
+    "SRAW": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b0111011",
+        "funct3": "0b101",
+        "funct7": "0b0100000",
+        "rd": "bits 11:7",
+        "rs1": "bits 19:15",
+        "rs2": "bits 24:20",
+        "full_encoding": "0100000 | rs2[24:20] | rs1[19:15] | 101 | rd[11:7] | 0111011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Shift right arithmetic word - arithmetic shifts lower 32 bits right, sign-extends result",
+      "comment": "SLLW, SRLW, and SRAW are RV64I-only instructions that perform 32-bit shifts and sign-extend the result.",
+      "spec_section": "5.2",
+      "operation": "x[rd] = sext(sra(x[rs1][31:0], x[rs2][4:0]))"
+    }
+  }
+}

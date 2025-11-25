@@ -146,6 +146,25 @@ All tests are compiled using LLVM/Clang toolchain and include verbatim citations
   - Bit pattern preservation for non-canonical NaNs
   - Tests with max/min int64 and uint64 values
 
+## Using This Corpus
+
+### As a Git Submodule (Recommended)
+
+The recommended way to use this corpus in your project is as a git submodule:
+
+```bash
+# Add the corpus as a submodule
+git submodule add https://github.com/portal-co/rv-corpus.git corpus
+
+# Clone a project with this submodule
+git clone --recurse-submodules <your-project-url>
+
+# Update an existing submodule
+git submodule update --init --recursive
+```
+
+This ensures you always have the latest test binaries and mappings synchronized with your project.
+
 ## Compilation
 
 ### Prerequisites

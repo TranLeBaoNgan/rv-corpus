@@ -1,0 +1,182 @@
+{
+  "$schema": "../../schemas/test-mapping.schema.json",
+  "test_file": "rv32i_zicsr/01_csr_instructions.s",
+  "isa": "RV32I_Zicsr",
+  "version": "1.0.0",
+  "spec_reference": "https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html",
+  "description": "Tests Zicsr extension CSR instructions. HINT instructions (addi x0, x0, N) mark test case N.",
+  "test_cases": [
+    {
+      "name": "CSRRW atomic read/write",
+      "hint_marker": 1,
+      "instructions": ["CSRRW"],
+      "initial_state": {
+        "registers": {"t0": "0x1F"}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t1": "old fflags value"
+        },
+        "flags": {
+          "fflags": "0x1F"
+        }
+      },
+      "comment": "The CSRRW (Atomic Read/Write CSR) instruction atomically swaps values in the CSRs and integer registers. CSRRW reads the old value of the CSR, zero-extends the value to XLEN bits, then writes it to integer register rd. The initial value in rs1 is written to the CSR.",
+      "spec_section": "9.1"
+    },
+    {
+      "name": "CSRRS atomic read and set bits",
+      "hint_marker": 2,
+      "instructions": ["CSRRS"],
+      "initial_state": {
+        "registers": {"t2": "0x10"}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t3": "old fflags value"
+        },
+        "flags": {
+          "fflags": "old | 0x10"
+        }
+      },
+      "comment": "The CSRRS (Atomic Read and Set Bits in CSR) instruction reads the value of the CSR, zero-extends the value to XLEN bits, and writes it to integer register rd. The initial value in integer register rs1 is treated as a bit mask that specifies bit positions to be set in the CSR.",
+      "spec_section": "9.1"
+    },
+    {
+      "name": "CSRRC atomic read and clear bits",
+      "hint_marker": 3,
+      "instructions": ["CSRRC"],
+      "initial_state": {
+        "registers": {"t4": "0x08"}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t5": "old fflags value"
+        },
+        "flags": {
+          "fflags": "old & ~0x08"
+        }
+      },
+      "comment": "The CSRRC (Atomic Read and Clear Bits in CSR) instruction reads the value of the CSR, zero-extends the value to XLEN bits, and writes it to integer register rd. The initial value in integer register rs1 is treated as a bit mask that specifies bit positions to be cleared in the CSR.",
+      "spec_section": "9.1"
+    },
+    {
+      "name": "CSR read-only with x0",
+      "hint_marker": 4,
+      "instructions": ["CSRRS", "CSRRC"],
+      "expected_behavior": {
+        "registers": {
+          "t6": "fflags value",
+          "a0": "fflags value"
+        }
+      },
+      "comment": "For both CSRRS and CSRRC, if rs1=x0, then the instruction will not write to the CSR at all, and so shall not cause any of the side effects that might otherwise occur on a CSR write.",
+      "spec_section": "9.1",
+      "notes": ["CSR is not modified when rs1=x0"]
+    },
+    {
+      "name": "CSRRWI with immediate",
+      "hint_marker": 5,
+      "instructions": ["CSRRWI"],
+      "expected_behavior": {
+        "registers": {
+          "a1": "old fflags value"
+        },
+        "flags": {
+          "fflags": "0x05"
+        }
+      },
+      "comment": "The immediate forms use a 5-bit zero-extended immediate encoded in the rs1 field.",
+      "spec_section": "9.1"
+    },
+    {
+      "name": "CSRRSI with immediate",
+      "hint_marker": 6,
+      "instructions": ["CSRRSI"],
+      "expected_behavior": {
+        "registers": {
+          "a2": "old fflags value"
+        },
+        "flags": {
+          "fflags": "old | 0x02"
+        }
+      },
+      "comment": "CSRRSI sets CSR bits specified by the immediate value.",
+      "spec_section": "9.1"
+    },
+    {
+      "name": "CSRRCI with immediate",
+      "hint_marker": 7,
+      "instructions": ["CSRRCI"],
+      "expected_behavior": {
+        "registers": {
+          "a3": "old fflags value"
+        },
+        "flags": {
+          "fflags": "old & ~0x04"
+        }
+      },
+      "comment": "CSRRCI clears CSR bits specified by the immediate value.",
+      "spec_section": "9.1"
+    },
+    {
+      "name": "Read cycle/time/instret counters",
+      "hint_marker": 8,
+      "instructions": ["CSRR"],
+      "expected_behavior": {
+        "registers": {
+          "a4": "cycle count",
+          "a5": "time value",
+          "a6": "instructions retired"
+        }
+      },
+      "comment": "Reading user-accessible performance counters.",
+      "spec_section": "10.1"
+    },
+    {
+      "name": "FP CSR access",
+      "hint_marker": 9,
+      "instructions": ["CSRRW"],
+      "expected_behavior": {
+        "registers": {
+          "s1": "old frm value",
+          "s3": "old fcsr value"
+        },
+        "flags": {
+          "frm": "0x01",
+          "fcsr": "0x00"
+        }
+      },
+      "comment": "Floating-point rounding mode and control/status register access.",
+      "spec_section": "13.2"
+    },
+    {
+      "name": "Read high CSRs (RV32)",
+      "hint_marker": 10,
+      "instructions": ["CSRR"],
+      "expected_behavior": {
+        "registers": {
+          "s4": "upper 32 bits of cycle",
+          "s5": "upper 32 bits of time",
+          "s6": "upper 32 bits of instret"
+        }
+      },
+      "comment": "On RV32, the cycle, time, and instret counters are 64-bit, accessible via high registers.",
+      "spec_section": "10.1"
+    },
+    {
+      "name": "Atomic read-modify-write sequence",
+      "hint_marker": 11,
+      "instructions": ["CSRRW", "CSRRS", "CSRRC"],
+      "expected_behavior": {
+        "registers": {
+          "t1": "old value",
+          "t2": "0xFF (or masked)",
+          "t4": "value after clear"
+        }
+      },
+      "comment": "Demonstrate atomic read-modify-write behavior.",
+      "spec_section": "9.1"
+    }
+  ]
+}

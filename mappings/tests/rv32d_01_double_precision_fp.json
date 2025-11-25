@@ -1,0 +1,236 @@
+{
+  "$schema": "../../schemas/test-mapping.schema.json",
+  "test_file": "rv32d/01_double_precision_fp.s",
+  "isa": "RV32D",
+  "version": "1.0.0",
+  "spec_reference": "https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html",
+  "description": "Tests RV32D double-precision floating-point instructions. HINT instructions (addi x0, x0, N) mark test case N.",
+  "test_cases": [
+    {
+      "name": "FLD/FSD Load and Store",
+      "hint_marker": 1,
+      "instructions": ["FLD", "FSD"],
+      "expected_behavior": {
+        "registers": {
+          "f0": "3.141592653589793 (pi)",
+          "f1": "2.718281828459045 (e)"
+        }
+      },
+      "comment": "FLD and FSD are only guaranteed to execute atomically if the effective address is naturally aligned.",
+      "spec_section": "14.3"
+    },
+    {
+      "name": "FADD.D double-precision add",
+      "hint_marker": 2,
+      "instructions": ["FADD.D"],
+      "expected_behavior": {
+        "registers": {
+          "f2": "5.859874482048838 (f0 + f1)"
+        }
+      },
+      "comment": "The double-precision floating-point computational instructions are defined analogously to their single-precision counterparts, but operate on double-precision operands and produce double-precision results.",
+      "spec_section": "14.4",
+      "python_verification": "f0 = 3.141592653589793; f1 = 2.718281828459045; f2 = f0 + f1"
+    },
+    {
+      "name": "FSUB.D double-precision subtract",
+      "hint_marker": 3,
+      "instructions": ["FSUB.D"],
+      "expected_behavior": {
+        "registers": {
+          "f3": "0.423310825130748 (f0 - f1)"
+        }
+      },
+      "comment": "FSUB.D performs double-precision floating-point subtraction.",
+      "spec_section": "14.4"
+    },
+    {
+      "name": "FMUL.D double-precision multiply",
+      "hint_marker": 4,
+      "instructions": ["FMUL.D"],
+      "expected_behavior": {
+        "registers": {
+          "f4": "8.539734222673566 (f0 * f1)"
+        }
+      },
+      "comment": "FMUL.D performs double-precision floating-point multiplication.",
+      "spec_section": "14.4"
+    },
+    {
+      "name": "FDIV.D double-precision divide",
+      "hint_marker": 5,
+      "instructions": ["FDIV.D"],
+      "expected_behavior": {
+        "registers": {
+          "f5": "1.155727349790921 (f0 / f1)"
+        }
+      },
+      "comment": "FDIV.D performs double-precision floating-point division.",
+      "spec_section": "14.4"
+    },
+    {
+      "name": "FSQRT.D double-precision square root",
+      "hint_marker": 6,
+      "instructions": ["FSQRT.D"],
+      "expected_behavior": {
+        "registers": {
+          "f6": "1.7724538509055159 (sqrt(f0))"
+        }
+      },
+      "comment": "FSQRT.D computes the double-precision square root of rs1.",
+      "spec_section": "14.4"
+    },
+    {
+      "name": "FMADD.D fused multiply-add",
+      "hint_marker": 7,
+      "instructions": ["FMADD.D"],
+      "expected_behavior": {
+        "registers": {
+          "f7": "(f0 * f1) + f2"
+        }
+      },
+      "comment": "The double-precision fused multiply-add instructions have the same behavior as their single-precision counterparts, operating on double-precision values.",
+      "spec_section": "14.5"
+    },
+    {
+      "name": "FMSUB.D fused multiply-subtract",
+      "hint_marker": 8,
+      "instructions": ["FMSUB.D"],
+      "expected_behavior": {
+        "registers": {
+          "f8": "(f0 * f1) - f2"
+        }
+      },
+      "comment": "FMSUB.D computes (rs1 × rs2) - rs3.",
+      "spec_section": "14.5"
+    },
+    {
+      "name": "FNMADD.D negated fused multiply-add",
+      "hint_marker": 9,
+      "instructions": ["FNMADD.D"],
+      "expected_behavior": {
+        "registers": {
+          "f9": "-(f0 * f1) - f2"
+        }
+      },
+      "comment": "FNMADD.D computes -(rs1 × rs2) - rs3.",
+      "spec_section": "14.5"
+    },
+    {
+      "name": "FNMSUB.D negated fused multiply-subtract",
+      "hint_marker": 10,
+      "instructions": ["FNMSUB.D"],
+      "expected_behavior": {
+        "registers": {
+          "f10": "-(f0 * f1) + f2"
+        }
+      },
+      "comment": "FNMSUB.D computes -(rs1 × rs2) + rs3.",
+      "spec_section": "14.5"
+    },
+    {
+      "name": "Sign injection instructions",
+      "hint_marker": 11,
+      "instructions": ["FSGNJ.D", "FSGNJN.D", "FSGNJX.D"],
+      "expected_behavior": {
+        "registers": {
+          "f11": "|f0| with sign of f1",
+          "f12": "|f0| with opposite sign of f1",
+          "f13": "|f0| with XOR of signs"
+        }
+      },
+      "comment": "Sign-injection instructions for double-precision.",
+      "spec_section": "14.6"
+    },
+    {
+      "name": "FMIN.D/FMAX.D min and max",
+      "hint_marker": 12,
+      "instructions": ["FMIN.D", "FMAX.D"],
+      "expected_behavior": {
+        "registers": {
+          "f14": "2.718281828459045 (min)",
+          "f15": "3.141592653589793 (max)"
+        }
+      },
+      "comment": "FMIN.D returns the smaller of rs1 and rs2.",
+      "spec_section": "14.7"
+    },
+    {
+      "name": "Comparison instructions",
+      "hint_marker": 13,
+      "instructions": ["FEQ.D", "FLT.D", "FLE.D"],
+      "expected_behavior": {
+        "registers": {
+          "t1": 0,
+          "t2": 0,
+          "t3": 0
+        }
+      },
+      "comment": "The double-precision floating-point compare instructions are defined analogously to their single-precision counterparts, but operate on double-precision operands.",
+      "spec_section": "14.8"
+    },
+    {
+      "name": "FCLASS.D classification",
+      "hint_marker": 14,
+      "instructions": ["FCLASS.D"],
+      "expected_behavior": {
+        "registers": {
+          "t4": "10-bit mask (positive normal)"
+        }
+      },
+      "comment": "As with floating-point compare instructions, FCLASS.D examines the double-precision value in floating-point register rs1.",
+      "spec_section": "14.9"
+    },
+    {
+      "name": "FCVT.W.D/FCVT.WU.D double to integer",
+      "hint_marker": 15,
+      "instructions": ["FCVT.W.D", "FCVT.WU.D"],
+      "expected_behavior": {
+        "registers": {
+          "t5": 3,
+          "t6": 3
+        }
+      },
+      "comment": "Floating-point-to-integer and integer-to-floating-point conversion instructions operate on double-precision values.",
+      "spec_section": "14.10"
+    },
+    {
+      "name": "FCVT.D.W/FCVT.D.WU integer to double",
+      "hint_marker": 16,
+      "instructions": ["FCVT.D.W", "FCVT.D.WU"],
+      "expected_behavior": {
+        "registers": {
+          "f16": 42.0,
+          "f17": 100.0
+        }
+      },
+      "comment": "FCVT.D.W converts a signed 32-bit integer to a double-precision floating-point number.",
+      "spec_section": "14.10"
+    },
+    {
+      "name": "FCVT.D.S/FCVT.S.D precision conversion",
+      "hint_marker": 17,
+      "instructions": ["FCVT.D.S", "FCVT.S.D"],
+      "expected_behavior": {
+        "registers": {
+          "f19": "1.5 (double from single)",
+          "f20": "3.14159 (single from double)"
+        }
+      },
+      "comment": "New floating-point-to-floating-point conversion instructions FCVT.S.D and FCVT.D.S are added which convert between single and double-precision.",
+      "spec_section": "14.10"
+    },
+    {
+      "name": "NaN boxing test",
+      "hint_marker": 18,
+      "instructions": ["FADD.S"],
+      "expected_behavior": {
+        "registers": {
+          "f21": "single-precision add result"
+        }
+      },
+      "comment": "When multiple floating-point precisions are supported, then valid values of narrower n-bit types, n < FLEN, are represented in the lower n bits of an FLEN-bit NaN value, in a process termed NaN-boxing.",
+      "spec_section": "14.2"
+    }
+  ]
+}

@@ -1,0 +1,466 @@
+{
+  "$schema": "../schemas/instruction-mapping.schema.json",
+  "isa": "RV32D",
+  "version": "1.0.0",
+  "spec_reference": "https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html",
+  "extends": "RV32F",
+  "instructions": {
+    "FLD": {
+      "format": "I-type",
+      "encoding": {
+        "opcode": "0b0000111",
+        "funct3": "0b011",
+        "rd": "bits 11:7 (floating-point register)",
+        "rs1": "bits 19:15 (base address register)",
+        "imm": "bits 31:20 (12-bit signed offset)",
+        "full_encoding": "imm[31:20] | rs1[19:15] | 011 | rd[11:7] | 0000111"
+      },
+      "assembly_syntax": "rd, offset(rs1)",
+      "description": "Load double-precision floating-point value from memory",
+      "comment": "FLD and FSD are only guaranteed to execute atomically if the effective address is naturally aligned.",
+      "spec_section": "14.3",
+      "operation": "f[rd] = M[x[rs1] + sext(offset)][63:0]",
+      "exceptions": ["Load address misaligned", "Load access fault"]
+    },
+    "FSD": {
+      "format": "S-type",
+      "encoding": {
+        "opcode": "0b0100111",
+        "funct3": "0b011",
+        "rs1": "bits 19:15 (base address register)",
+        "rs2": "bits 24:20 (floating-point source register)",
+        "imm": "bits 31:25 and 11:7 (12-bit signed offset)",
+        "full_encoding": "imm[11:5] | rs2[24:20] | rs1[19:15] | 011 | imm[4:0] | 0100111"
+      },
+      "assembly_syntax": "rs2, offset(rs1)",
+      "description": "Store double-precision floating-point value to memory",
+      "comment": "FLD and FSD are only guaranteed to execute atomically if the effective address is naturally aligned.",
+      "spec_section": "14.3",
+      "operation": "M[x[rs1] + sext(offset)] = f[rs2][63:0]",
+      "exceptions": ["Store address misaligned", "Store access fault"]
+    },
+    "FADD.D": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b0000001",
+        "funct3": "rm (rounding mode)",
+        "rd": "bits 11:7 (floating-point destination)",
+        "rs1": "bits 19:15 (floating-point source 1)",
+        "rs2": "bits 24:20 (floating-point source 2)",
+        "rm": "bits 14:12 (rounding mode)",
+        "full_encoding": "0000001 | rs2[24:20] | rs1[19:15] | rm[14:12] | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Double-precision floating-point addition",
+      "comment": "The double-precision floating-point computational instructions are defined analogously to their single-precision counterparts, but operate on double-precision operands and produce double-precision results.",
+      "spec_section": "14.4",
+      "operation": "f[rd] = f[rs1] + f[rs2]"
+    },
+    "FSUB.D": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b0000101",
+        "funct3": "rm (rounding mode)",
+        "rd": "bits 11:7 (floating-point destination)",
+        "rs1": "bits 19:15 (floating-point source 1)",
+        "rs2": "bits 24:20 (floating-point source 2)",
+        "rm": "bits 14:12 (rounding mode)",
+        "full_encoding": "0000101 | rs2[24:20] | rs1[19:15] | rm[14:12] | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Double-precision floating-point subtraction",
+      "comment": "FSUB.D performs double-precision floating-point subtraction.",
+      "spec_section": "14.4",
+      "operation": "f[rd] = f[rs1] - f[rs2]"
+    },
+    "FMUL.D": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b0001001",
+        "funct3": "rm (rounding mode)",
+        "rd": "bits 11:7 (floating-point destination)",
+        "rs1": "bits 19:15 (floating-point source 1)",
+        "rs2": "bits 24:20 (floating-point source 2)",
+        "rm": "bits 14:12 (rounding mode)",
+        "full_encoding": "0001001 | rs2[24:20] | rs1[19:15] | rm[14:12] | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Double-precision floating-point multiplication",
+      "comment": "FMUL.D performs double-precision floating-point multiplication.",
+      "spec_section": "14.4",
+      "operation": "f[rd] = f[rs1] × f[rs2]"
+    },
+    "FDIV.D": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b0001101",
+        "funct3": "rm (rounding mode)",
+        "rd": "bits 11:7 (floating-point destination)",
+        "rs1": "bits 19:15 (floating-point source 1)",
+        "rs2": "bits 24:20 (floating-point source 2)",
+        "rm": "bits 14:12 (rounding mode)",
+        "full_encoding": "0001101 | rs2[24:20] | rs1[19:15] | rm[14:12] | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Double-precision floating-point division",
+      "comment": "FDIV.D performs double-precision floating-point division.",
+      "spec_section": "14.4",
+      "operation": "f[rd] = f[rs1] / f[rs2]"
+    },
+    "FSQRT.D": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b0101101",
+        "funct3": "rm (rounding mode)",
+        "rd": "bits 11:7 (floating-point destination)",
+        "rs1": "bits 19:15 (floating-point source)",
+        "rs2": "00000",
+        "rm": "bits 14:12 (rounding mode)",
+        "full_encoding": "0101101 | 00000 | rs1[19:15] | rm[14:12] | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1",
+      "description": "Double-precision floating-point square root",
+      "comment": "FSQRT.D computes the double-precision square root of rs1.",
+      "spec_section": "14.4",
+      "operation": "f[rd] = sqrt(f[rs1])"
+    },
+    "FMADD.D": {
+      "format": "R4-type",
+      "encoding": {
+        "opcode": "0b1000011",
+        "funct2": "0b01",
+        "rd": "bits 11:7 (floating-point destination)",
+        "rs1": "bits 19:15 (floating-point source 1)",
+        "rs2": "bits 24:20 (floating-point source 2)",
+        "rs3": "bits 31:27 (floating-point source 3)",
+        "rm": "bits 14:12 (rounding mode)",
+        "full_encoding": "rs3[31:27] | 01 | rs2[24:20] | rs1[19:15] | rm[14:12] | rd[11:7] | 1000011"
+      },
+      "assembly_syntax": "rd, rs1, rs2, rs3",
+      "description": "Double-precision fused multiply-add",
+      "comment": "The double-precision fused multiply-add instructions have the same behavior as their single-precision counterparts, operating on double-precision values.",
+      "spec_section": "14.5",
+      "operation": "f[rd] = (f[rs1] × f[rs2]) + f[rs3]"
+    },
+    "FMSUB.D": {
+      "format": "R4-type",
+      "encoding": {
+        "opcode": "0b1000111",
+        "funct2": "0b01",
+        "rd": "bits 11:7 (floating-point destination)",
+        "rs1": "bits 19:15 (floating-point source 1)",
+        "rs2": "bits 24:20 (floating-point source 2)",
+        "rs3": "bits 31:27 (floating-point source 3)",
+        "rm": "bits 14:12 (rounding mode)",
+        "full_encoding": "rs3[31:27] | 01 | rs2[24:20] | rs1[19:15] | rm[14:12] | rd[11:7] | 1000111"
+      },
+      "assembly_syntax": "rd, rs1, rs2, rs3",
+      "description": "Double-precision fused multiply-subtract",
+      "comment": "FMSUB.D computes (rs1 × rs2) - rs3.",
+      "spec_section": "14.5",
+      "operation": "f[rd] = (f[rs1] × f[rs2]) - f[rs3]"
+    },
+    "FNMADD.D": {
+      "format": "R4-type",
+      "encoding": {
+        "opcode": "0b1001111",
+        "funct2": "0b01",
+        "rd": "bits 11:7 (floating-point destination)",
+        "rs1": "bits 19:15 (floating-point source 1)",
+        "rs2": "bits 24:20 (floating-point source 2)",
+        "rs3": "bits 31:27 (floating-point source 3)",
+        "rm": "bits 14:12 (rounding mode)",
+        "full_encoding": "rs3[31:27] | 01 | rs2[24:20] | rs1[19:15] | rm[14:12] | rd[11:7] | 1001111"
+      },
+      "assembly_syntax": "rd, rs1, rs2, rs3",
+      "description": "Double-precision negated fused multiply-add",
+      "comment": "FNMADD.D computes -(rs1 × rs2) - rs3.",
+      "spec_section": "14.5",
+      "operation": "f[rd] = -(f[rs1] × f[rs2]) - f[rs3]"
+    },
+    "FNMSUB.D": {
+      "format": "R4-type",
+      "encoding": {
+        "opcode": "0b1001011",
+        "funct2": "0b01",
+        "rd": "bits 11:7 (floating-point destination)",
+        "rs1": "bits 19:15 (floating-point source 1)",
+        "rs2": "bits 24:20 (floating-point source 2)",
+        "rs3": "bits 31:27 (floating-point source 3)",
+        "rm": "bits 14:12 (rounding mode)",
+        "full_encoding": "rs3[31:27] | 01 | rs2[24:20] | rs1[19:15] | rm[14:12] | rd[11:7] | 1001011"
+      },
+      "assembly_syntax": "rd, rs1, rs2, rs3",
+      "description": "Double-precision negated fused multiply-subtract",
+      "comment": "FNMSUB.D computes -(rs1 × rs2) + rs3.",
+      "spec_section": "14.5",
+      "operation": "f[rd] = -(f[rs1] × f[rs2]) + f[rs3]"
+    },
+    "FSGNJ.D": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b0010001",
+        "funct3": "0b000",
+        "rd": "bits 11:7 (floating-point destination)",
+        "rs1": "bits 19:15 (floating-point source 1)",
+        "rs2": "bits 24:20 (floating-point source 2)",
+        "full_encoding": "0010001 | rs2[24:20] | rs1[19:15] | 000 | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Double-precision floating-point sign injection",
+      "comment": "Sign-injection instructions for double-precision.",
+      "spec_section": "14.6",
+      "operation": "f[rd] = {f[rs2][63], f[rs1][62:0]}"
+    },
+    "FSGNJN.D": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b0010001",
+        "funct3": "0b001",
+        "rd": "bits 11:7 (floating-point destination)",
+        "rs1": "bits 19:15 (floating-point source 1)",
+        "rs2": "bits 24:20 (floating-point source 2)",
+        "full_encoding": "0010001 | rs2[24:20] | rs1[19:15] | 001 | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Double-precision floating-point sign injection negated",
+      "comment": "FSGNJN.D produces a result with the sign bit negated from rs2.",
+      "spec_section": "14.6",
+      "operation": "f[rd] = {~f[rs2][63], f[rs1][62:0]}"
+    },
+    "FSGNJX.D": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b0010001",
+        "funct3": "0b010",
+        "rd": "bits 11:7 (floating-point destination)",
+        "rs1": "bits 19:15 (floating-point source 1)",
+        "rs2": "bits 24:20 (floating-point source 2)",
+        "full_encoding": "0010001 | rs2[24:20] | rs1[19:15] | 010 | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Double-precision floating-point sign injection XOR",
+      "comment": "FSGNJX.D produces a result with the sign bit XORed from rs1 and rs2.",
+      "spec_section": "14.6",
+      "operation": "f[rd] = {f[rs1][63] ^ f[rs2][63], f[rs1][62:0]}"
+    },
+    "FMIN.D": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b0010101",
+        "funct3": "0b000",
+        "rd": "bits 11:7 (floating-point destination)",
+        "rs1": "bits 19:15 (floating-point source 1)",
+        "rs2": "bits 24:20 (floating-point source 2)",
+        "full_encoding": "0010101 | rs2[24:20] | rs1[19:15] | 000 | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Double-precision floating-point minimum",
+      "comment": "FMIN.D returns the smaller of rs1 and rs2.",
+      "spec_section": "14.7",
+      "operation": "f[rd] = min(f[rs1], f[rs2])"
+    },
+    "FMAX.D": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b0010101",
+        "funct3": "0b001",
+        "rd": "bits 11:7 (floating-point destination)",
+        "rs1": "bits 19:15 (floating-point source 1)",
+        "rs2": "bits 24:20 (floating-point source 2)",
+        "full_encoding": "0010101 | rs2[24:20] | rs1[19:15] | 001 | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Double-precision floating-point maximum",
+      "comment": "FMAX.D returns the larger of rs1 and rs2.",
+      "spec_section": "14.7",
+      "operation": "f[rd] = max(f[rs1], f[rs2])"
+    },
+    "FEQ.D": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b1010001",
+        "funct3": "0b010",
+        "rd": "bits 11:7 (integer destination)",
+        "rs1": "bits 19:15 (floating-point source 1)",
+        "rs2": "bits 24:20 (floating-point source 2)",
+        "full_encoding": "1010001 | rs2[24:20] | rs1[19:15] | 010 | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Double-precision floating-point equal comparison",
+      "comment": "The double-precision floating-point compare instructions are defined analogously to their single-precision counterparts, but operate on double-precision operands.",
+      "spec_section": "14.8",
+      "operation": "x[rd] = (f[rs1] == f[rs2]) ? 1 : 0"
+    },
+    "FLT.D": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b1010001",
+        "funct3": "0b001",
+        "rd": "bits 11:7 (integer destination)",
+        "rs1": "bits 19:15 (floating-point source 1)",
+        "rs2": "bits 24:20 (floating-point source 2)",
+        "full_encoding": "1010001 | rs2[24:20] | rs1[19:15] | 001 | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Double-precision floating-point less-than comparison",
+      "comment": "FLT.D returns 1 if rs1 < rs2, 0 otherwise.",
+      "spec_section": "14.8",
+      "operation": "x[rd] = (f[rs1] < f[rs2]) ? 1 : 0"
+    },
+    "FLE.D": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b1010001",
+        "funct3": "0b000",
+        "rd": "bits 11:7 (integer destination)",
+        "rs1": "bits 19:15 (floating-point source 1)",
+        "rs2": "bits 24:20 (floating-point source 2)",
+        "full_encoding": "1010001 | rs2[24:20] | rs1[19:15] | 000 | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1, rs2",
+      "description": "Double-precision floating-point less-than-or-equal comparison",
+      "comment": "FLE.D returns 1 if rs1 <= rs2, 0 otherwise.",
+      "spec_section": "14.8",
+      "operation": "x[rd] = (f[rs1] <= f[rs2]) ? 1 : 0"
+    },
+    "FCLASS.D": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b1110001",
+        "funct3": "0b001",
+        "rd": "bits 11:7 (integer destination)",
+        "rs1": "bits 19:15 (floating-point source)",
+        "rs2": "00000",
+        "full_encoding": "1110001 | 00000 | rs1[19:15] | 001 | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1",
+      "description": "Double-precision floating-point classify",
+      "comment": "As with floating-point compare instructions, FCLASS.D examines the double-precision value in floating-point register rs1.",
+      "spec_section": "14.9",
+      "operation": "x[rd] = classify(f[rs1])"
+    },
+    "FCVT.W.D": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b1100001",
+        "funct3": "rm (rounding mode)",
+        "rd": "bits 11:7 (integer destination)",
+        "rs1": "bits 19:15 (floating-point source)",
+        "rs2": "00000",
+        "rm": "bits 14:12 (rounding mode)",
+        "full_encoding": "1100001 | 00000 | rs1[19:15] | rm[14:12] | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1",
+      "description": "Convert double-precision float to signed 32-bit integer",
+      "comment": "Floating-point-to-integer and integer-to-floating-point conversion instructions operate on double-precision values.",
+      "spec_section": "14.10",
+      "operation": "x[rd] = sext(s32(f[rs1]))"
+    },
+    "FCVT.WU.D": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b1100001",
+        "funct3": "rm (rounding mode)",
+        "rd": "bits 11:7 (integer destination)",
+        "rs1": "bits 19:15 (floating-point source)",
+        "rs2": "00001",
+        "rm": "bits 14:12 (rounding mode)",
+        "full_encoding": "1100001 | 00001 | rs1[19:15] | rm[14:12] | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1",
+      "description": "Convert double-precision float to unsigned 32-bit integer",
+      "comment": "FCVT.WU.D converts a double-precision floating-point number to an unsigned 32-bit integer.",
+      "spec_section": "14.10",
+      "operation": "x[rd] = sext(u32(f[rs1]))"
+    },
+    "FCVT.D.W": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b1101001",
+        "funct3": "rm (rounding mode)",
+        "rd": "bits 11:7 (floating-point destination)",
+        "rs1": "bits 19:15 (integer source)",
+        "rs2": "00000",
+        "rm": "bits 14:12 (rounding mode)",
+        "full_encoding": "1101001 | 00000 | rs1[19:15] | rm[14:12] | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1",
+      "description": "Convert signed 32-bit integer to double-precision float",
+      "comment": "FCVT.D.W converts a signed 32-bit integer to a double-precision floating-point number.",
+      "spec_section": "14.10",
+      "operation": "f[rd] = f64(s32(x[rs1]))"
+    },
+    "FCVT.D.WU": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b1101001",
+        "funct3": "rm (rounding mode)",
+        "rd": "bits 11:7 (floating-point destination)",
+        "rs1": "bits 19:15 (integer source)",
+        "rs2": "00001",
+        "rm": "bits 14:12 (rounding mode)",
+        "full_encoding": "1101001 | 00001 | rs1[19:15] | rm[14:12] | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1",
+      "description": "Convert unsigned 32-bit integer to double-precision float",
+      "comment": "FCVT.D.WU converts an unsigned 32-bit integer to a double-precision floating-point number.",
+      "spec_section": "14.10",
+      "operation": "f[rd] = f64(u32(x[rs1]))"
+    },
+    "FCVT.S.D": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b0100000",
+        "funct3": "rm (rounding mode)",
+        "rd": "bits 11:7 (floating-point destination)",
+        "rs1": "bits 19:15 (floating-point source)",
+        "rs2": "00001",
+        "rm": "bits 14:12 (rounding mode)",
+        "full_encoding": "0100000 | 00001 | rs1[19:15] | rm[14:12] | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1",
+      "description": "Convert double-precision float to single-precision float",
+      "comment": "New floating-point-to-floating-point conversion instructions FCVT.S.D and FCVT.D.S are added which convert between single and double-precision.",
+      "spec_section": "14.10",
+      "operation": "f[rd] = f32(f[rs1])"
+    },
+    "FCVT.D.S": {
+      "format": "R-type",
+      "encoding": {
+        "opcode": "0b1010011",
+        "funct7": "0b0100001",
+        "funct3": "rm (rounding mode)",
+        "rd": "bits 11:7 (floating-point destination)",
+        "rs1": "bits 19:15 (floating-point source)",
+        "rs2": "00000",
+        "rm": "bits 14:12 (rounding mode)",
+        "full_encoding": "0100001 | 00000 | rs1[19:15] | rm[14:12] | rd[11:7] | 1010011"
+      },
+      "assembly_syntax": "rd, rs1",
+      "description": "Convert single-precision float to double-precision float",
+      "comment": "New floating-point-to-floating-point conversion instructions FCVT.S.D and FCVT.D.S are added which convert between single and double-precision.",
+      "spec_section": "14.10",
+      "operation": "f[rd] = f64(f[rs1])"
+    }
+  }
+}

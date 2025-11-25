@@ -10,34 +10,40 @@ _start:
     # "The atomic-instruction extension, 'A', provides support for
     # atomic read-modify-write operations for multiprocessor synchronization"
     
-    # Initialize test memory
+    # Test 1: Initialize test memory
+    addi x0, x0, 1              # HINT marker: Test case 1 - Initialize
     la s0, atomic_var
     li t0, 100
     sw t0, 0(s0)
     
-    # Section 8.2: Load-Reserved/Store-Conditional
+    # Test 2: Section 8.2: Load-Reserved/Store-Conditional
     # "LR.W loads a word from the address in rs1, places the sign-extended
     # value in rd, and registers a reservation on the memory address"
+    addi x0, x0, 2              # HINT marker: Test case 2 - LR.W
     lr.w t1, (s0)           # Load-reserved from atomic_var
     
-    # "SC.W conditionally writes a word in rs2 to the address in rs1.
+    # Test 3: "SC.W conditionally writes a word in rs2 to the address in rs1.
     # The SC.W succeeds only if the reservation is still valid and the
     # reservation set contains the bytes being written."
+    addi x0, x0, 3              # HINT marker: Test case 3 - SC.W success
     li t2, 200
     sc.w t3, t2, (s0)       # Store-conditional (should succeed, t3=0)
     
-    # Verify the store succeeded
+    # Test 4: Verify the store succeeded
+    addi x0, x0, 4              # HINT marker: Test case 4 - Verify SC
     lw t4, 0(s0)            # Should be 200
     
-    # Test failed SC (reservation should be lost after first SC)
+    # Test 5: Test failed SC (reservation should be lost after first SC)
+    addi x0, x0, 5              # HINT marker: Test case 5 - SC.W fail
     li t5, 300
     sc.w t6, t5, (s0)       # This should fail (t6=1)
     
-    # Section 8.3: Atomic Memory Operations (AMOs)
+    # Test 6: Section 8.3: Atomic Memory Operations (AMOs)
     # "The atomic fetch-and-op memory instructions perform an atomic
     # read-modify-write operation."
     
     # Reset test value
+    addi x0, x0, 6              # HINT marker: Test case 6 - AMOSWAP.W
     li a0, 10
     sw a0, 0(s0)
     
@@ -48,29 +54,34 @@ _start:
     amoswap.w a2, a1, (s0)  # a2 = old value (10), mem = 50
     lw a3, 0(s0)            # a3 = 50
     
-    # AMOADD.W atomically adds
+    # Test 7: AMOADD.W atomically adds
     # "AMOADD.W loads the word at address rs1, adds the value in rs2,
     # then writes the result to the address in rs1."
+    addi x0, x0, 7              # HINT marker: Test case 7 - AMOADD.W
     li a4, 25
     amoadd.w a5, a4, (s0)   # a5 = old value (50), mem = 75
     lw a6, 0(s0)            # a6 = 75
     
-    # AMOXOR.W atomically XORs
+    # Test 8: AMOXOR.W atomically XORs
+    addi x0, x0, 8              # HINT marker: Test case 8 - AMOXOR.W
     li a7, 0xFF
     amoxor.w s1, a7, (s0)   # s1 = old value (75), mem = 75 XOR 0xFF
     lw s2, 0(s0)            # Load result
     
-    # AMOAND.W atomically ANDs
+    # Test 9: AMOAND.W atomically ANDs
+    addi x0, x0, 9              # HINT marker: Test case 9 - AMOAND.W
     li s3, 0xF0
     amoand.w s4, s3, (s0)   # s4 = old value, mem = old AND 0xF0
     lw s5, 0(s0)            # Load result
     
-    # AMOOR.W atomically ORs
+    # Test 10: AMOOR.W atomically ORs
+    addi x0, x0, 10             # HINT marker: Test case 10 - AMOOR.W
     li s6, 0x0F
     amoor.w s7, s6, (s0)    # s7 = old value, mem = old OR 0x0F
     lw s8, 0(s0)            # Load result
     
-    # Reset for min/max tests
+    # Test 11: Reset for min/max tests
+    addi x0, x0, 11             # HINT marker: Test case 11 - AMOMIN.W
     li t0, 100
     sw t0, 0(s0)
     
@@ -82,25 +93,29 @@ _start:
     amomin.w t2, t1, (s0)   # t2 = 100, mem = min(100, 50) = 50
     lw t3, 0(s0)            # t3 = 50
     
-    # AMOMAX.W atomically computes signed maximum
+    # Test 12: AMOMAX.W atomically computes signed maximum
+    addi x0, x0, 12             # HINT marker: Test case 12 - AMOMAX.W
     li t4, 150
     amomax.w t5, t4, (s0)   # t5 = 50, mem = max(50, 150) = 150
     lw t6, 0(s0)            # t6 = 150
     
-    # AMOMINU.W atomically computes unsigned minimum
+    # Test 13: AMOMINU.W atomically computes unsigned minimum
+    addi x0, x0, 13             # HINT marker: Test case 13 - AMOMINU.W
     li a0, 0xFFFFFFFF       # Large unsigned value
     sw a0, 0(s0)
     li a1, 200
     amominu.w a2, a1, (s0)  # a2 = 0xFFFFFFFF, mem = 200
     lw a3, 0(s0)            # a3 = 200
     
-    # AMOMAXU.W atomically computes unsigned maximum
+    # Test 14: AMOMAXU.W atomically computes unsigned maximum
+    addi x0, x0, 14             # HINT marker: Test case 14 - AMOMAXU.W
     li a4, 0xFFFFFFFF
     amomaxu.w a5, a4, (s0)  # a5 = 200, mem = 0xFFFFFFFF
     lw a6, 0(s0)            # a6 = 0xFFFFFFFF
     
-    # Section 8.4: Memory Ordering
+    # Test 15: Section 8.4: Memory Ordering
     # Test with acquire/release semantics
+    addi x0, x0, 15             # HINT marker: Test case 15 - acquire/release
     la s0, atomic_var
     li t0, 42
     sw t0, 0(s0)
@@ -116,13 +131,15 @@ _start:
     li a0, 100
     amoswap.w.aqrl a1, a0, (s0)
     
-    # Test fence instruction
+    # Test 16: Test fence instruction
     # "The FENCE instruction is used to order device I/O and memory
     # accesses as viewed by other RISC-V harts and external devices"
+    addi x0, x0, 16             # HINT marker: Test case 16 - FENCE
     fence
     fence.i                  # Instruction fence
     
-    # Test multiple LR/SC pairs
+    # Test 17: Test multiple LR/SC pairs
+    addi x0, x0, 17             # HINT marker: Test case 17 - LR/SC pairs
     la s1, atomic_var2
     li t0, 1
     sw t0, 0(s1)

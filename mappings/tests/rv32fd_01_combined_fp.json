@@ -1,0 +1,129 @@
+{
+  "$schema": "../../schemas/test-mapping.schema.json",
+  "test_file": "rv32fd/01_combined_fp.s",
+  "isa": "RV32FD",
+  "version": "1.0.0",
+  "spec_reference": "https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html",
+  "description": "Tests combined RV32F and RV32D floating-point operations. HINT instructions (addi x0, x0, N) mark test case N.",
+  "test_cases": [
+    {
+      "name": "Load single and double precision",
+      "hint_marker": 1,
+      "instructions": ["FLW", "FLD"],
+      "expected_behavior": {
+        "registers": {
+          "f0": "1.5 (single)",
+          "f1": "3.14159265359 (double)"
+        }
+      },
+      "comment": "FLW and FLD load single and double precision values respectively.",
+      "spec_section": "13.3, 14.3"
+    },
+    {
+      "name": "Single-precision operations",
+      "hint_marker": 2,
+      "instructions": ["FADD.S", "FMUL.S"],
+      "expected_behavior": {
+        "registers": {
+          "f3": "4.0 (1.5 + 2.5)",
+          "f4": "3.75 (1.5 * 2.5)"
+        }
+      },
+      "comment": "FADD.S and FMUL.S perform single-precision arithmetic.",
+      "spec_section": "13.4"
+    },
+    {
+      "name": "Double-precision operations",
+      "hint_marker": 3,
+      "instructions": ["FADD.D", "FMUL.D"],
+      "expected_behavior": {
+        "registers": {
+          "f6": "f1 + f5",
+          "f7": "f1 * f5"
+        }
+      },
+      "comment": "FADD.D and FMUL.D perform double-precision arithmetic.",
+      "spec_section": "14.4"
+    },
+    {
+      "name": "Precision conversions",
+      "hint_marker": 4,
+      "instructions": ["FCVT.D.S", "FCVT.S.D"],
+      "expected_behavior": {
+        "registers": {
+          "f8": "1.5 as double",
+          "f9": "3.14159 as single"
+        }
+      },
+      "comment": "New floating-point-to-floating-point conversion instructions FCVT.S.D and FCVT.D.S are added which convert between single and double-precision.",
+      "spec_section": "14.10"
+    },
+    {
+      "name": "Mixed precision arithmetic",
+      "hint_marker": 5,
+      "instructions": ["FCVT.D.S", "FADD.D"],
+      "expected_behavior": {
+        "registers": {
+          "f10": "f3 as double",
+          "f11": "f10 + f6"
+        }
+      },
+      "comment": "Mixed precision arithmetic via conversions.",
+      "spec_section": "13.4, 14.4"
+    },
+    {
+      "name": "FMA both precisions",
+      "hint_marker": 6,
+      "instructions": ["FMADD.S", "FMADD.D"],
+      "expected_behavior": {
+        "registers": {
+          "f12": "(f0 * f2) + f3",
+          "f13": "(f1 * f5) + f6"
+        }
+      },
+      "comment": "Fused multiply-add operations for both single and double precision.",
+      "spec_section": "13.5, 14.5"
+    },
+    {
+      "name": "Comparison operations",
+      "hint_marker": 7,
+      "instructions": ["FEQ.S", "FLT.D"],
+      "expected_behavior": {
+        "registers": {
+          "t1": "0 or 1",
+          "t2": "0 or 1"
+        }
+      },
+      "comment": "Floating-point compare instructions for both precisions.",
+      "spec_section": "13.8, 14.8"
+    },
+    {
+      "name": "Integer conversions",
+      "hint_marker": 8,
+      "instructions": ["FCVT.W.S", "FCVT.W.D", "FCVT.S.W", "FCVT.D.W"],
+      "expected_behavior": {
+        "registers": {
+          "a0": "1 (from 1.5)",
+          "a1": "3 (from 3.14159)",
+          "f14": "123.0",
+          "f15": "123.0"
+        }
+      },
+      "comment": "Integer conversion instructions for both precisions.",
+      "spec_section": "13.10, 14.10"
+    },
+    {
+      "name": "Store results",
+      "hint_marker": 9,
+      "instructions": ["FSW", "FSD"],
+      "expected_behavior": {
+        "memory": {
+          "test_data+24": "f9 stored",
+          "test_data+32": "f8 stored"
+        }
+      },
+      "comment": "Store results to memory.",
+      "spec_section": "13.3, 14.3"
+    }
+  ]
+}

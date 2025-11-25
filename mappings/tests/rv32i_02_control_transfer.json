@@ -1,0 +1,156 @@
+{
+  "$schema": "../../schemas/test-mapping.schema.json",
+  "test_file": "rv32i/02_control_transfer.s",
+  "isa": "RV32I",
+  "version": "1.0.0",
+  "spec_reference": "https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html",
+  "description": "Tests RV32I control transfer instructions including unconditional jumps (JAL, JALR) and conditional branches (BEQ, BNE, BLT, BGE, BLTU, BGEU). HINT instructions (addi x0, x0, N) mark test case N.",
+  "test_cases": [
+    {
+      "name": "JAL and JALR basic jump and return",
+      "hint_marker": 1,
+      "instructions": ["JAL", "JALR"],
+      "expected_behavior": {
+        "registers": {
+          "ra": "address of instruction after JAL (pc+4)",
+          "t0": 1
+        },
+        "pc_change": "jump to test_jal, then return"
+      },
+      "comment": "The jump and link (JAL) instruction uses the J-type format, where the J-immediate encodes a signed offset in multiples of 2 bytes. The offset is sign-extended and added to the pc to form the jump target address. JAL stores the address of the instruction following the jump (pc+4) into register rd.",
+      "spec_section": "2.5.1",
+      "notes": ["JAL stores return address in ra, JALR with rd=zero discards return address"]
+    },
+    {
+      "name": "JALR indirect jump",
+      "hint_marker": 2,
+      "instructions": ["JALR"],
+      "expected_behavior": {
+        "registers": {
+          "t2": 2
+        },
+        "pc_change": "jump to address in t1"
+      },
+      "comment": "The indirect jump instruction JALR (jump and link register) uses the I-type encoding. The target address is obtained by adding the 12-bit signed I-immediate to the register rs1, then setting the least-significant bit of the result to zero.",
+      "spec_section": "2.5.1",
+      "notes": ["JALR clears the LSB of the target address to ensure 2-byte alignment"]
+    },
+    {
+      "name": "BEQ branch if equal - taken",
+      "hint_marker": 3,
+      "instructions": ["BEQ"],
+      "initial_state": {
+        "registers": {"a0": 10, "a1": 10}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t3": 1
+        },
+        "pc_change": "branch taken to beq_taken"
+      },
+      "comment": "BEQ and BNE take the branch if registers rs1 and rs2 are equal or unequal respectively.",
+      "spec_section": "2.5.2",
+      "python_verification": "a0 = 10; a1 = 10; branch_taken = (a0 == a1)  # True, so t3 = 1"
+    },
+    {
+      "name": "BNE branch if not equal - taken",
+      "hint_marker": 4,
+      "instructions": ["BNE"],
+      "initial_state": {
+        "registers": {"a2": 5, "a3": 10}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t4": 1
+        },
+        "pc_change": "branch taken to bne_taken"
+      },
+      "comment": "BEQ and BNE take the branch if registers rs1 and rs2 are equal or unequal respectively.",
+      "spec_section": "2.5.2",
+      "python_verification": "a2 = 5; a3 = 10; branch_taken = (a2 != a3)  # True, so t4 = 1"
+    },
+    {
+      "name": "BLT branch if less than signed - taken",
+      "hint_marker": 5,
+      "instructions": ["BLT"],
+      "initial_state": {
+        "registers": {"s0": -5, "s1": 10}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t5": 1
+        },
+        "pc_change": "branch taken to blt_taken"
+      },
+      "comment": "BLT and BLTU take the branch if rs1 is less than rs2, using signed and unsigned comparison respectively.",
+      "spec_section": "2.5.2",
+      "python_verification": "import ctypes; s0 = ctypes.c_int32(-5).value; s1 = 10; branch_taken = (s0 < s1)  # True (-5 < 10 signed)"
+    },
+    {
+      "name": "BLTU branch if less than unsigned - taken",
+      "hint_marker": 6,
+      "instructions": ["BLTU"],
+      "initial_state": {
+        "registers": {"s2": "0xFFFFFFFF", "s3": 10}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t6": 1
+        },
+        "pc_change": "branch taken to bltu_taken"
+      },
+      "comment": "BLT and BLTU take the branch if rs1 is less than rs2, using signed and unsigned comparison respectively.",
+      "spec_section": "2.5.2",
+      "python_verification": "s2 = 0xFFFFFFFF; s3 = 10; branch_taken = (s3 < s2)  # True (10 < 0xFFFFFFFF unsigned)",
+      "notes": ["0xFFFFFFFF is -1 as signed but maximum unsigned 32-bit value"]
+    },
+    {
+      "name": "BGE branch if greater or equal signed - taken",
+      "hint_marker": 7,
+      "instructions": ["BGE"],
+      "initial_state": {
+        "registers": {"a4": 20, "a5": 10}
+      },
+      "expected_behavior": {
+        "registers": {
+          "s4": 1
+        },
+        "pc_change": "branch taken to bge_taken"
+      },
+      "comment": "BGE and BGEU take the branch if rs1 is greater than or equal to rs2, using signed and unsigned comparison respectively.",
+      "spec_section": "2.5.2",
+      "python_verification": "a4 = 20; a5 = 10; branch_taken = (a4 >= a5)  # True (20 >= 10)"
+    },
+    {
+      "name": "BGEU branch if greater or equal unsigned - equal case",
+      "hint_marker": 8,
+      "instructions": ["BGEU"],
+      "initial_state": {
+        "registers": {"a6": 10, "a7": 10}
+      },
+      "expected_behavior": {
+        "registers": {
+          "s5": 1
+        },
+        "pc_change": "branch taken to bgeu_taken"
+      },
+      "comment": "BGE and BGEU take the branch if rs1 is greater than or equal to rs2, using signed and unsigned comparison respectively.",
+      "spec_section": "2.5.2",
+      "python_verification": "a6 = 10; a7 = 10; branch_taken = (a6 >= a7)  # True (10 >= 10)"
+    },
+    {
+      "name": "Forward and backward branches",
+      "hint_marker": 9,
+      "instructions": ["J"],
+      "expected_behavior": {
+        "registers": {
+          "s6": 2
+        },
+        "pc_change": "forward jump, then backward jump"
+      },
+      "comment": "All branch instructions use the B-type instruction format. The 12-bit B-immediate encodes signed offsets in multiples of 2, and is added to the current pc to give the target address.",
+      "spec_section": "2.5.2",
+      "notes": ["Tests both forward and backward branch targets", "J is pseudo-instruction for JAL x0, offset"]
+    }
+  ]
+}

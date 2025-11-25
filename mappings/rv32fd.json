@@ -1,0 +1,8 @@
+{
+  "$schema": "../schemas/instruction-mapping.schema.json",
+  "isa": "RV32FD",
+  "version": "1.0.0",
+  "spec_reference": "https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html",
+  "extends": "RV32D",
+  "instructions": {}
+}

@@ -1,0 +1,255 @@
+{
+  "$schema": "../../schemas/test-mapping.schema.json",
+  "test_file": "rv32f/01_single_precision_fp.s",
+  "isa": "RV32F",
+  "version": "1.0.0",
+  "spec_reference": "https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html",
+  "description": "Tests RV32F single-precision floating-point instructions. HINT instructions (addi x0, x0, N) mark test case N.",
+  "test_cases": [
+    {
+      "name": "FLW/FSW Load and Store",
+      "hint_marker": 1,
+      "instructions": ["FLW", "FSW"],
+      "expected_behavior": {
+        "registers": {
+          "f0": "3.14159 (approx)",
+          "f1": "2.71828 (approx)"
+        },
+        "memory": {
+          "fp_data+8": "3.14159 (stored)"
+        }
+      },
+      "comment": "FLW and FSW are only guaranteed to execute atomically if the effective address is naturally aligned.",
+      "spec_section": "13.3"
+    },
+    {
+      "name": "FADD.S floating-point add",
+      "hint_marker": 2,
+      "instructions": ["FADD.S"],
+      "expected_behavior": {
+        "registers": {
+          "f2": "5.85987 (approx, f0 + f1)"
+        }
+      },
+      "comment": "Floating-point arithmetic instructions with one or two source operands use the R-type format with the OP-FP major opcode.",
+      "spec_section": "13.4",
+      "python_verification": "f0 = 3.14159; f1 = 2.71828; f2 = f0 + f1  # f2 ≈ 5.85987"
+    },
+    {
+      "name": "FSUB.S floating-point subtract",
+      "hint_marker": 3,
+      "instructions": ["FSUB.S"],
+      "expected_behavior": {
+        "registers": {
+          "f3": "0.42331 (approx, f0 - f1)"
+        }
+      },
+      "comment": "FSUB.S performs single-precision floating-point subtraction.",
+      "spec_section": "13.4",
+      "python_verification": "f0 = 3.14159; f1 = 2.71828; f3 = f0 - f1  # f3 ≈ 0.42331"
+    },
+    {
+      "name": "FMUL.S floating-point multiply",
+      "hint_marker": 4,
+      "instructions": ["FMUL.S"],
+      "expected_behavior": {
+        "registers": {
+          "f4": "8.53973 (approx, f0 * f1)"
+        }
+      },
+      "comment": "FMUL.S performs single-precision floating-point multiplication.",
+      "spec_section": "13.4",
+      "python_verification": "f0 = 3.14159; f1 = 2.71828; f4 = f0 * f1  # f4 ≈ 8.53973"
+    },
+    {
+      "name": "FDIV.S floating-point divide",
+      "hint_marker": 5,
+      "instructions": ["FDIV.S"],
+      "expected_behavior": {
+        "registers": {
+          "f5": "1.15573 (approx, f0 / f1)"
+        }
+      },
+      "comment": "FDIV.S performs single-precision floating-point division.",
+      "spec_section": "13.4",
+      "python_verification": "f0 = 3.14159; f1 = 2.71828; f5 = f0 / f1  # f5 ≈ 1.15573"
+    },
+    {
+      "name": "FSQRT.S floating-point square root",
+      "hint_marker": 6,
+      "instructions": ["FSQRT.S"],
+      "expected_behavior": {
+        "registers": {
+          "f6": "1.77245 (approx, sqrt(f0))"
+        }
+      },
+      "comment": "Floating-point square root instructions are provided for each supported floating-point format.",
+      "spec_section": "13.4",
+      "python_verification": "import math; f0 = 3.14159; f6 = math.sqrt(f0)  # f6 ≈ 1.77245"
+    },
+    {
+      "name": "FMADD.S fused multiply-add",
+      "hint_marker": 7,
+      "instructions": ["FMADD.S"],
+      "expected_behavior": {
+        "registers": {
+          "f7": "(f0 * f1) + f2"
+        }
+      },
+      "comment": "The fused multiply-add instructions must set the invalid operation exception flag when the multiplicands are infinity and zero, even when the addend is a quiet NaN.",
+      "spec_section": "13.5"
+    },
+    {
+      "name": "FMSUB.S fused multiply-subtract",
+      "hint_marker": 8,
+      "instructions": ["FMSUB.S"],
+      "expected_behavior": {
+        "registers": {
+          "f8": "(f0 * f1) - f2"
+        }
+      },
+      "comment": "FMSUB.S computes (rs1 × rs2) - rs3.",
+      "spec_section": "13.5"
+    },
+    {
+      "name": "FNMADD.S negated fused multiply-add",
+      "hint_marker": 9,
+      "instructions": ["FNMADD.S"],
+      "expected_behavior": {
+        "registers": {
+          "f9": "-(f0 * f1) - f2"
+        }
+      },
+      "comment": "FNMADD.S computes -(rs1 × rs2) - rs3.",
+      "spec_section": "13.5"
+    },
+    {
+      "name": "FNMSUB.S negated fused multiply-subtract",
+      "hint_marker": 10,
+      "instructions": ["FNMSUB.S"],
+      "expected_behavior": {
+        "registers": {
+          "f10": "-(f0 * f1) + f2"
+        }
+      },
+      "comment": "FNMSUB.S computes -(rs1 × rs2) + rs3.",
+      "spec_section": "13.5"
+    },
+    {
+      "name": "FSGNJ.S sign injection",
+      "hint_marker": 11,
+      "instructions": ["FSGNJ.S"],
+      "expected_behavior": {
+        "registers": {
+          "f11": "|f0| with sign of f1"
+        }
+      },
+      "comment": "Sign-injection instructions, FSGNJ.S, FSGNJN.S, and FSGNJX.S, produce a result that takes all bits except the sign bit from rs1.",
+      "spec_section": "13.6"
+    },
+    {
+      "name": "FSGNJN.S sign injection negated",
+      "hint_marker": 12,
+      "instructions": ["FSGNJN.S"],
+      "expected_behavior": {
+        "registers": {
+          "f12": "|f0| with opposite sign of f1"
+        }
+      },
+      "comment": "FSGNJN.S produces a result with the sign bit negated from rs2.",
+      "spec_section": "13.6"
+    },
+    {
+      "name": "FSGNJX.S sign injection XOR",
+      "hint_marker": 13,
+      "instructions": ["FSGNJX.S"],
+      "expected_behavior": {
+        "registers": {
+          "f13": "|f0| with XOR of signs"
+        }
+      },
+      "comment": "FSGNJX.S produces a result with the sign bit XORed from rs1 and rs2.",
+      "spec_section": "13.6"
+    },
+    {
+      "name": "FMIN.S/FMAX.S min and max",
+      "hint_marker": 14,
+      "instructions": ["FMIN.S", "FMAX.S"],
+      "expected_behavior": {
+        "registers": {
+          "f14": "2.71828 (min)",
+          "f15": "3.14159 (max)"
+        }
+      },
+      "comment": "The FMIN.S and FMAX.S instructions return the smaller or larger of rs1 and rs2.",
+      "spec_section": "13.7"
+    },
+    {
+      "name": "FEQ.S/FLT.S/FLE.S comparisons",
+      "hint_marker": 15,
+      "instructions": ["FEQ.S", "FLT.S", "FLE.S"],
+      "expected_behavior": {
+        "registers": {
+          "t1": 0,
+          "t2": 0,
+          "t3": 0
+        }
+      },
+      "comment": "Floating-point compare instructions perform the specified comparison between floating-point registers, writing 1 to the integer register rd if the condition holds, and 0 otherwise.",
+      "spec_section": "13.8",
+      "python_verification": "f0 = 3.14159; f1 = 2.71828; t1 = int(f0 == f1); t2 = int(f0 < f1); t3 = int(f0 <= f1)  # All 0"
+    },
+    {
+      "name": "FCLASS.S classification",
+      "hint_marker": 16,
+      "instructions": ["FCLASS.S"],
+      "expected_behavior": {
+        "registers": {
+          "t4": "10-bit mask (positive normal)"
+        }
+      },
+      "comment": "The FCLASS.S instruction examines the value in floating-point register rs1 and writes to integer register rd a 10-bit mask that indicates the class of the floating-point number.",
+      "spec_section": "13.9"
+    },
+    {
+      "name": "FCVT.W.S/FCVT.WU.S float to integer",
+      "hint_marker": 17,
+      "instructions": ["FCVT.W.S", "FCVT.WU.S"],
+      "expected_behavior": {
+        "registers": {
+          "t5": 3,
+          "t6": 3
+        }
+      },
+      "comment": "Floating-point-to-integer and integer-to-floating-point conversion instructions are encoded in the OP-FP major opcode space.",
+      "spec_section": "13.10",
+      "python_verification": "f0 = 3.14159; t5 = int(f0); t6 = int(f0)  # Both 3"
+    },
+    {
+      "name": "FCVT.S.W/FCVT.S.WU integer to float",
+      "hint_marker": 18,
+      "instructions": ["FCVT.S.W", "FCVT.S.WU"],
+      "expected_behavior": {
+        "registers": {
+          "f16": 42.0,
+          "f17": 100.0
+        }
+      },
+      "comment": "FCVT.S.W converts a signed 32-bit integer to a single-precision floating-point number.",
+      "spec_section": "13.10"
+    },
+    {
+      "name": "FMV.X.W/FMV.W.X move bits",
+      "hint_marker": 19,
+      "instructions": ["FMV.X.W", "FMV.W.X"],
+      "expected_behavior": {
+        "registers": {
+          "a2": "bit pattern of f0",
+          "f18": "equals f0"
+        }
+      },
+      "comment": "FMV.X.W moves the single-precision value in floating-point register rs1 represented in IEEE 754-2008 encoding to the lower 32 bits of integer register rd.",
+      "spec_section": "13.11"
+    }
+  ]
+}

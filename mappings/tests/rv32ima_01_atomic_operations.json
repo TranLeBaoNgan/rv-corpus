@@ -1,0 +1,255 @@
+{
+  "$schema": "../../schemas/test-mapping.schema.json",
+  "test_file": "rv32ima/01_atomic_operations.s",
+  "isa": "RV32IMA",
+  "version": "1.0.0",
+  "spec_reference": "https://github.com/riscv/riscv-isa-manual/releases/download/riscv-isa-release-98ea4b5-2025-11-05/riscv-unprivileged.html",
+  "description": "Tests RV32IMA atomic instructions. HINT instructions (addi x0, x0, N) mark test case N.",
+  "test_cases": [
+    {
+      "name": "Initialize test memory",
+      "hint_marker": 1,
+      "instructions": ["SW"],
+      "initial_state": {
+        "registers": {"t0": 100}
+      },
+      "expected_behavior": {
+        "memory": {
+          "atomic_var": 100
+        }
+      },
+      "comment": "The atomic-instruction extension, 'A', provides support for atomic read-modify-write operations for multiprocessor synchronization.",
+      "spec_section": "8.1"
+    },
+    {
+      "name": "LR.W load-reserved",
+      "hint_marker": 2,
+      "instructions": ["LR.W"],
+      "expected_behavior": {
+        "registers": {
+          "t1": 100
+        }
+      },
+      "comment": "LR.W loads a word from the address in rs1, places the sign-extended value in rd, and registers a reservation on the memory address.",
+      "spec_section": "8.2"
+    },
+    {
+      "name": "SC.W store-conditional success",
+      "hint_marker": 3,
+      "instructions": ["SC.W"],
+      "initial_state": {
+        "registers": {"t2": 200}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t3": 0
+        },
+        "memory": {
+          "atomic_var": 200
+        }
+      },
+      "comment": "SC.W conditionally writes a word in rs2 to the address in rs1. The SC.W succeeds only if the reservation is still valid and the reservation set contains the bytes being written. If successful, zero is written to rd.",
+      "spec_section": "8.2"
+    },
+    {
+      "name": "Verify SC success",
+      "hint_marker": 4,
+      "instructions": ["LW"],
+      "expected_behavior": {
+        "registers": {
+          "t4": 200
+        }
+      },
+      "comment": "Verify store-conditional succeeded.",
+      "spec_section": "8.2"
+    },
+    {
+      "name": "SC.W store-conditional fail",
+      "hint_marker": 5,
+      "instructions": ["SC.W"],
+      "expected_behavior": {
+        "registers": {
+          "t6": 1
+        }
+      },
+      "comment": "SC.W fails if the reservation is no longer valid, writing a nonzero value to rd.",
+      "spec_section": "8.2",
+      "edge_case": true
+    },
+    {
+      "name": "AMOSWAP.W atomic swap",
+      "hint_marker": 6,
+      "instructions": ["AMOSWAP.W"],
+      "initial_state": {
+        "memory": {"atomic_var": 10}
+      },
+      "expected_behavior": {
+        "registers": {
+          "a2": 10,
+          "a3": 50
+        },
+        "memory": {
+          "atomic_var": 50
+        }
+      },
+      "comment": "AMOSWAP.W loads the word at address rs1, then writes the value from rs2 to the address in rs1. The value loaded is placed in rd.",
+      "spec_section": "8.3"
+    },
+    {
+      "name": "AMOADD.W atomic add",
+      "hint_marker": 7,
+      "instructions": ["AMOADD.W"],
+      "expected_behavior": {
+        "registers": {
+          "a5": 50,
+          "a6": 75
+        },
+        "memory": {
+          "atomic_var": 75
+        }
+      },
+      "comment": "AMOADD.W loads the word at address rs1, adds the value in rs2, then writes the result to the address in rs1. The original value is placed in rd.",
+      "spec_section": "8.3",
+      "python_verification": "old = 50; new = old + 25  # a5 = 50, a6 = 75"
+    },
+    {
+      "name": "AMOXOR.W atomic XOR",
+      "hint_marker": 8,
+      "instructions": ["AMOXOR.W"],
+      "expected_behavior": {
+        "registers": {
+          "s1": 75
+        }
+      },
+      "comment": "AMOXOR.W atomically XORs the value in memory with rs2.",
+      "spec_section": "8.3",
+      "python_verification": "old = 75; new = old ^ 0xFF  # s1 = 75, mem = 180"
+    },
+    {
+      "name": "AMOAND.W atomic AND",
+      "hint_marker": 9,
+      "instructions": ["AMOAND.W"],
+      "expected_behavior": {
+        "registers": {
+          "s4": "previous value"
+        }
+      },
+      "comment": "AMOAND.W atomically ANDs the value in memory with rs2.",
+      "spec_section": "8.3"
+    },
+    {
+      "name": "AMOOR.W atomic OR",
+      "hint_marker": 10,
+      "instructions": ["AMOOR.W"],
+      "expected_behavior": {
+        "registers": {
+          "s7": "previous value"
+        }
+      },
+      "comment": "AMOOR.W atomically ORs the value in memory with rs2.",
+      "spec_section": "8.3"
+    },
+    {
+      "name": "AMOMIN.W atomic signed minimum",
+      "hint_marker": 11,
+      "instructions": ["AMOMIN.W"],
+      "initial_state": {
+        "memory": {"atomic_var": 100}
+      },
+      "expected_behavior": {
+        "registers": {
+          "t2": 100,
+          "t3": 50
+        },
+        "memory": {
+          "atomic_var": 50
+        }
+      },
+      "comment": "AMOMIN.W loads the word at address rs1, compares it with the value in rs2 treating both as signed numbers, then writes the smaller value to the address in rs1.",
+      "spec_section": "8.3"
+    },
+    {
+      "name": "AMOMAX.W atomic signed maximum",
+      "hint_marker": 12,
+      "instructions": ["AMOMAX.W"],
+      "expected_behavior": {
+        "registers": {
+          "t5": 50,
+          "t6": 150
+        },
+        "memory": {
+          "atomic_var": 150
+        }
+      },
+      "comment": "AMOMAX.W compares and writes the larger of the two signed values.",
+      "spec_section": "8.3"
+    },
+    {
+      "name": "AMOMINU.W atomic unsigned minimum",
+      "hint_marker": 13,
+      "instructions": ["AMOMINU.W"],
+      "expected_behavior": {
+        "registers": {
+          "a2": "0xFFFFFFFF",
+          "a3": 200
+        },
+        "memory": {
+          "atomic_var": 200
+        }
+      },
+      "comment": "AMOMINU.W atomically computes unsigned minimum.",
+      "spec_section": "8.3"
+    },
+    {
+      "name": "AMOMAXU.W atomic unsigned maximum",
+      "hint_marker": 14,
+      "instructions": ["AMOMAXU.W"],
+      "expected_behavior": {
+        "registers": {
+          "a5": 200,
+          "a6": "0xFFFFFFFF"
+        },
+        "memory": {
+          "atomic_var": "0xFFFFFFFF"
+        }
+      },
+      "comment": "AMOMAXU.W atomically computes unsigned maximum.",
+      "spec_section": "8.3"
+    },
+    {
+      "name": "Acquire/release semantics",
+      "hint_marker": 15,
+      "instructions": ["LR.W.AQ", "SC.W.RL", "AMOSWAP.W.AQRL"],
+      "expected_behavior": {
+        "registers": {
+          "t1": 42,
+          "a1": 84
+        }
+      },
+      "comment": "Memory ordering with acquire and release semantics.",
+      "spec_section": "8.4"
+    },
+    {
+      "name": "FENCE instructions",
+      "hint_marker": 16,
+      "instructions": ["FENCE", "FENCE.I"],
+      "expected_behavior": {},
+      "comment": "The FENCE instruction is used to order device I/O and memory accesses as viewed by other RISC-V harts and external devices.",
+      "spec_section": "2.7"
+    },
+    {
+      "name": "Multiple LR/SC pairs",
+      "hint_marker": 17,
+      "instructions": ["LR.W", "SC.W"],
+      "expected_behavior": {
+        "registers": {
+          "t2": 0,
+          "t4": 0,
+          "t5": 3
+        }
+      },
+      "comment": "Testing multiple consecutive LR/SC pairs.",
+      "spec_section": "8.2"
+    }
+  ]
+}
